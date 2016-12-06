@@ -98,7 +98,7 @@ extern EJ_DevInfo_t _g_dev;
  void EJ_messageArrived(MessageData* m)
 
 {
-	EJ_Printf("EJ_messageArrived \r\n");
+	//EJ_Printf("EJ_messageArrived \r\n");
 	uint8_t *data = (uint8_t *)(m->message->payload);
 	wifi2CloudPacket *pPacket = (wifi2CloudPacket *)EJ_mem_malloc(sizeof(wifi2CloudPacket));
 	if (pPacket) {		
@@ -110,7 +110,7 @@ extern EJ_DevInfo_t _g_dev;
 		pPacket->dataLen[1] = data[5];
 		pPacket->dataLen[2] = data[6];
 		pPacket->dataLen[3] = data[7];
-		EJ_Printf("EJ_messageArrived dataLen[0]=%d ,payloadlen =%d \r\n",pPacket->dataLen[0],m->message->payloadlen);
+		//EJ_Printf("EJ_messageArrived dataLen[0]=%d ,payloadlen =%d \r\n",pPacket->dataLen[0],m->message->payloadlen);
 		memset(text,0,256);
 		if (EJ_Aes_Decrypt((unsigned char *)(data + 8), m->message->payloadlen - 8 - 16, text) != 0)
 		{
@@ -119,7 +119,7 @@ extern EJ_DevInfo_t _g_dev;
 			return ;
 			
 		}
-		EJ_Printf("success EJ_Aes_Decrypt\r\n");
+		//EJ_Printf("success EJ_Aes_Decrypt\r\n");
 		pPacket->data = (uint8_t *)EJ_mem_malloc(pPacket->dataLen[0] - 36);
 		if (pPacket->data) {
 			pPacket->dataType[0] = text[0];
@@ -233,12 +233,12 @@ static void EJ_PublishMQTTMessage(char *topicName, int qos, int retained, void *
 	message.payload = payload;
 	message.payloadlen = dataLen;
 
-	EJ_Printf("qos=%d,dataLen=%d,topicName=%s\r\n",qos,dataLen,topicName);
+	//EJ_Printf("qos=%d,dataLen=%d,topicName=%s\r\n",qos,dataLen,topicName);
 	if ((rc = MQTTPublish(&opts->client, topicName, &message)) != 0)
 	{
 		EJ_ErrPrintf(("[MQTTThread.c][PublishMQTTMessage][ERROR]: Unable to publish topic.\r\n"));
 	}else{	
-		EJ_ErrPrintf(("[MQTTThread.c][PublishMQTTMessage][SUCCESS]: SUCCESS to publish topic.\r\n"));
+		//EJ_InfoPrintf(("[MQTTThread.c][PublishMQTTMessage][SUCCESS]: SUCCESS to publish topic.\r\n"));
 	}
 
 

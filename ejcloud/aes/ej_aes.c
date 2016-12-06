@@ -74,6 +74,10 @@ static void md5_result_dump(uint8_t *result, uint8_t length)
 int EJ_Aes_Encrypt(unsigned char *pPlainTxt, unsigned int TextLen, unsigned char *pCipTxt)
 {
 
+	uint8_t PlainTxt_buffer[256] = {0};
+    //uint8_t decrypted_buffer[256] = {0};
+	memcpy(PlainTxt_buffer,pPlainTxt,TextLen);
+
 	hal_aes_buffer_t encrypted_text = {
 			.buffer = pCipTxt,
 			.length = (TextLen/16 + 1)*16
@@ -81,7 +85,7 @@ int EJ_Aes_Encrypt(unsigned char *pPlainTxt, unsigned int TextLen, unsigned char
 	};
 	
     hal_aes_buffer_t plain_text = {
-            .buffer = pPlainTxt,
+            .buffer = PlainTxt_buffer,
             .length = TextLen
     };	
 	
@@ -97,8 +101,8 @@ int EJ_Aes_Encrypt(unsigned char *pPlainTxt, unsigned int TextLen, unsigned char
 int EJ_Aes_Decrypt(unsigned char *pCipTxt, unsigned int CipTxtLen, unsigned char *pPlainTxt)
 {
 
-	printf("EJ_Aes_Decrypt1: CipTxtLen = %d\r\n",CipTxtLen);
-	aes_result_dump(pCipTxt, CipTxtLen);
+	//printf("EJ_Aes_Decrypt1: CipTxtLen = %d\r\n",CipTxtLen);
+	//aes_result_dump(pCipTxt, CipTxtLen);
 
 	uint8_t encrypted_buffer[256] = {0};
     //uint8_t decrypted_buffer[256] = {0};
@@ -114,7 +118,7 @@ int EJ_Aes_Decrypt(unsigned char *pCipTxt, unsigned int CipTxtLen, unsigned char
             .length = CipTxtLen
     };
 
-	printf("EJ_Aes_Decrypt2: enc_len = %d, dec_len =%d\r\n",encrypted_text.length,decrypted_text.length);
+	//printf("EJ_Aes_Decrypt2: enc_len = %d, dec_len =%d\r\n",encrypted_text.length,decrypted_text.length);
 	
 	
 	if (-1 == hal_aes_ecb_decrypt(&decrypted_text, &encrypted_text, &key)) {
@@ -123,7 +127,7 @@ int EJ_Aes_Decrypt(unsigned char *pCipTxt, unsigned int CipTxtLen, unsigned char
 		}
 
 	CipTxtLen = decrypted_text.length;
-	printf("EJ_Aes_Decrypt3: enc_len = %d, dec_len =%d\r\n",encrypted_text.length,decrypted_text.length);
+	//printf("EJ_Aes_Decrypt3: enc_len = %d, dec_len =%d\r\n",encrypted_text.length,decrypted_text.length);
 
 	//memcpy(pPlainTxt,decrypted_buffer,decrypted_text.length);
 	return 0;

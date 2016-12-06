@@ -73,7 +73,7 @@ uint8_t Process_RequestDeviceIDFromCloudResponseCB(wifi2CloudPacket *pPacket)
 				uint8_t tmp[6]={0};
 				memcpy(tmp,(uint8_t *)(pPacket->data + 2),6);
 
-				EJ_Printf("0x8015 report did = %02X %02X %02X %02X %02X \r\n",tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5]);
+				EJ_Printf("0x8015 report did = %02X %02X %02X %02X %02X %02X \r\n",tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5]);
 				
 
 				SetWifiStatusDeviceID(tmp);

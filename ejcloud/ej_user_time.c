@@ -426,7 +426,7 @@ int EJ_time_init()
  */
 int EJ_time_set(const struct ej_tm *tm)
 {
-	printf("EJ_time_set .....\n");
+	//printf("EJ_time_set .....\n");
 	if (validate_date_time(tm) == 0) {
 
 		hal_rtc_time_t  hal_t;
@@ -437,7 +437,7 @@ int EJ_time_set(const struct ej_tm *tm)
 	    hal_t.rtc_mon = tm->tm_mon+1;                                  /**< Months                     - [1,12]  */
 	    hal_t.rtc_week= tm->tm_wday;                                 /**< Days in a week             - [0,6]   */
 	    hal_t.rtc_year= tm->tm_year;   
-		printf("EJ_time_set validate\n");
+		//printf("EJ_time_set validate\n");
 		return hal_rtc_set_time(&hal_t);
 		
 	} else {
@@ -469,7 +469,7 @@ int EJ_time_get(struct ej_tm *tm)
 		tm->tm_year  = hal_t.rtc_year;
 		return ret ;
 	}
-	printf("EJ_time_get error............ret= %d.\n",ret);
+	//printf("EJ_time_get error............ret= %d.\n",ret);
 	return ret;
 }
 
@@ -508,8 +508,8 @@ int EJ_Wlan_get_time(uint8_t *pTimeArray)
 	pTimeArray[5] = h_tm.tm_mon;
 	pTimeArray[6] = h_tm.tm_year;
 
-	printf("EJ_Wlan_get_time  %d:%d:%d:%d:%d:%d\n",pTimeArray[0],pTimeArray[1],pTimeArray[2],\
-		pTimeArray[3],pTimeArray[4],pTimeArray[5]);
+	//printf("EJ_Wlan_get_time  %d:%d:%d:%d:%d:%d\n",pTimeArray[0],pTimeArray[1],pTimeArray[2],\
+		//pTimeArray[3],pTimeArray[4],pTimeArray[5]);
 	return ret ;
 }
 
