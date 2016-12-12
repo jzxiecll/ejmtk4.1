@@ -1,5 +1,3 @@
-//#include <wm_os.h>
-//#include <mdev_aes.h>
 #include "ej_aes.h"
 
 

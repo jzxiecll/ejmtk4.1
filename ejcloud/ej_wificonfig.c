@@ -634,6 +634,7 @@ int32_t smt_rx_handler(uint8_t *payload, uint32_t len)
     pkt.len = len;
     pkt.payload  = smt_rx_buf[smt_rx_buf_idx];
     memcpy(pkt.payload, payload, SMTCN_STATIC_BUF_SIZE);
+//	printf("smt_rx_handler by static buf");
     if (xQueueSendToBack(smt_rx_queue, (void *)&pkt, (TickType_t)5) == pdPASS) {
         smt_rx_buf_idx = (smt_rx_buf_idx + 1) % SMTCN_STATIC_BUF_COUNT;
     }
@@ -644,7 +645,7 @@ int32_t smt_rx_handler(uint8_t *payload, uint32_t len)
         LOG_E(joylink_smt, "%s:%d,pvPortMalloc failed\n", __FILE__, __LINE__);
         return 1;
     }
-	
+//	printf("smt_rx_handler by static buf");
     memcpy(pkt.payload, payload, len);
 	
 
@@ -768,7 +769,7 @@ static void smt_rcv_pkt_thread(void *pvParameters)
         vTaskDelete(NULL);
     }
     xSemaphoreTake(smt_config_mutex, portMAX_DELAY);
-    LOG_I(joylink_smt, "\n>>>>>> Smart connect begin <<<<<<\n\n");
+    LOG_I(joylink_smt, "\n>>>>>> joylink smart connect begin <<<<<<\n\n");
 
     memset((void *)&saved_smt_info, 0, sizeof(saved_smt_info));
 
@@ -899,7 +900,7 @@ wifi_smart_connect_status_t wifi_smart_connect_start (uint16_t timeout_seconds)
 //        return WIFI_SMART_CONNECTION_ERROR;
 //    }
 
-	if (xTaskCreate(smt_rcv_pkt_thread, "smart connection thread", 1024, NULL, configTIMER_TASK_PRIORITY, &smt_handle) != pdPASS) {
+	if (xTaskCreate(smt_rcv_pkt_thread, "joylink connection thread", 1024, NULL, configTIMER_TASK_PRIORITY, &smt_handle) != pdPASS) {
         LOG_E(joylink_smt, "smt_rcv_pkt_thread create failed\n");
         return WIFI_SMART_CONNECTION_ERROR;
     }
@@ -912,6 +913,18 @@ wifi_smart_connect_status_t wifi_smart_connect_start (uint16_t timeout_seconds)
     wifi_config_get_rx_filter(&origin_rxfilter);
 	rx_filter &= ~BIT(WIFI_RX_FILTER_DROP_BC_FRAME);
     wifi_config_set_rx_filter(rx_filter);
+	/*
+
+	uint32_t rx_filter;
+    wifi_config_get_rx_filter(&origin_rxfilter);
+    rx_filter = origin_rxfilter | BIT(WIFI_RX_FILTER_RM_FRAME_REPORT_EN);
+    rx_filter &= ~BIT(WIFI_RX_FILTER_DROP_NOT_MY_BSSID);
+    rx_filter &= ~BIT(WIFI_RX_FILTER_DROP_NOT_UC2ME);
+    rx_filter &= ~BIT(WIFI_RX_FILTER_DROP_MC_FRAME);
+	
+	wifi_config_set_smart_connection_filter(1);
+*/
+
 	
 #endif
     wifi_config_get_bandwidth(WIFI_PORT_STA, &origin_bw);
@@ -1044,9 +1057,10 @@ void smt_evt_handler(wifi_smart_connect_event_t event, void *data)
         case WIFI_SMART_CONNECTION_EVENT_INFO_COLLECTED:
             wifi_smart_connect_get_result(ssid, &ssid_len, passwd, &passwd_len, NULL, NULL);
             wifi_config_set_ssid(WIFI_PORT_STA, ssid, ssid_len);
-			
+			wifi_profile_set_ssid(WIFI_PORT_STA, ssid, ssid_len);
             if (passwd_len != 0) {
                 wifi_config_set_wpa_psk_key(WIFI_PORT_STA, passwd, passwd_len);
+				wifi_profile_set_wpa_psk_key(WIFI_PORT_STA, passwd, passwd_len);
 				
                 if(passwd_len == 10 || passwd_len == 26 || passwd_len == 5 || passwd_len == 13)
                 {
@@ -1081,13 +1095,16 @@ void smt_evt_handler(wifi_smart_connect_event_t event, void *data)
 
 int32_t joylink_smart_connect(void)
 {
+
+
+	printf("joylink start ..............................\r\n");
     if(wifi_smart_connect_init(NULL, 0, smt_evt_handler) < 0){
         return -1;
     }
 
     if(!wifi_smart_connect_start(0))
     {
-    	joycfg_profile_set_configfree(1);
+    	//joycfg_profile_set_configfree(1);
 		
     	return 0;
     }
@@ -1106,6 +1123,32 @@ int32_t joylink_smart_stop(void)
 int32_t joylink_connection_disconnect_ap(void)
 {
 	return wifi_connection_disconnect_ap();
+}
+
+
+
+void EJ_WifiConfigProcess(unsigned char confgiMode)
+{
+
+		switch(confgiMode)
+		{
+			case WIFICONFIG_AP_MODE:
+				EJ_Printf("[WifiConfigProcess] : WIFICONFIG_AP_MODE !\r\n");
+				break;
+			case WIFICONFIG_AIRKISS_MODE:
+				EJ_Printf("[WifiConfigProcess] : WIFICONFIG_AIRKISS_MODE !\r\n");		
+				break;
+			case WIFICONFIG_EZCONNECT_MODE:	
+				EJ_Printf("[WifiConfigProcess] : WIFICONFIG_EZCONNECT_MODE !\r\n");
+				joylink_smart_connect();
+				break;
+			default:
+				EJ_Printf("[WifiConfigProcess] : default !\r\n");
+				joylink_smart_connect();
+				break;
+		}
+		
+
 }
 
 #endif

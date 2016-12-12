@@ -39,9 +39,45 @@
 extern "C" {
 #endif
 
+typedef enum
+{
+
+	EJ_IOT_EVENT_MAINLOOP =1 ,
+	EJ_IOT_EVENT_UNCONFIGED,	
+
+}EJ_Iot_event_t;
+
+
+
+typedef enum
+{
+
+	EJ_IOT_STAT_FAILED=1 ,
+	EJ_IOT_STAT_GETIP,	
+
+}EJ_Iot_Status_t;
+
+
+int  EJ_Send_IotEvent( EJ_Iot_event_t EventItem);
+
 void user_wifi_app_entry(void *args);
 
+int32_t user_wifi_status_ipready(void);
+
 int32_t user_wifi_init_complete_handler(wifi_event_t event, uint8_t *payload, uint32_t length);
+
+int32_t event_normal_connect_failed(wifi_event_t event,
+									 uint8_t *payload,
+									 uint32_t length);
+int32_t event_normal_disconnected(wifi_event_t event,
+									 uint8_t *payload,
+									 uint32_t length);
+int32_t event_normal_connected(wifi_event_t event,
+									 uint8_t *payload,
+									 uint32_t length);
+
+									 
+
 
 #ifdef __cplusplus
 }

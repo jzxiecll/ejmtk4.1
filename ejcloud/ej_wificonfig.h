@@ -368,11 +368,8 @@ int32_t joylink_smart_stop(void);
 int32_t joylink_connection_disconnect_ap(void);
 
 
-static void WifiConfigMainLoopThread(void* data);
+void EJ_WifiConfigProcess(unsigned char confgiMode);
 
-void InitWifiConfigManager();
-
-void SendAirkissConfigResult();
 
 #ifdef __cplusplus
 }

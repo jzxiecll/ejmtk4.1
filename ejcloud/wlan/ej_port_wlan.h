@@ -33,7 +33,9 @@ typedef struct {
 
 void EJ_init_dev();
 int    EJ_App_reboot(uint8_t reason);
-int   EJ_App_network_configured(int state);
+int   EJ_App_network_configured(unsigned char state);
+int   EJ_App_network_configured_status(unsigned char *state);
+
 int  EJ_App_psm_erase();
 void  EJ_App_reset();
 int   EJ_Wlan_get_connection_state(int *state);

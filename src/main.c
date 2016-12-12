@@ -116,33 +116,38 @@ int main(void)
      *            when it is done , the WIFI_EVENT_IOT_INIT_COMPLETE event will be triggered */
     wifi_init(&config, &config_ext);
 
-    wifi_connection_register_event_handler(WIFI_EVENT_IOT_INIT_COMPLETE, wifi_init_done_handler);
-
+    wifi_connection_register_event_handler(WIFI_EVENT_IOT_INIT_COMPLETE, user_wifi_init_complete_handler);
+//	wifi_connection_register_event_handler(WIFI_EVENT_IOT_CONNECTED,event_normal_connected );
+//	wifi_connection_register_event_handler(WIFI_EVENT_IOT_CONNECTION_FAILED,event_normal_connect_failed );
+	//	wifi_connection_register_event_handler(WIFI_EVENT_IOT_DISCONNECTED,event_normal_disconnected );
 
     /* Tcpip stack and net interface initialization,  dhcp client, dhcp server process initialization*/
     lwip_network_init(config.opmode);
     lwip_net_start(config.opmode);
 
-#ifdef MTK_WIFI_CONFIGURE_FREE_ENABLE
-        uint8_t configured = 0;
-        register_configure_free_callback(save_cf_credential_to_nvdm,  save_cf_ready_to_nvdm);
-        get_cf_ready_to_nvdm(&configured);
-		uint8_t smartconfigured = 0;
-		get_smart_conf_to_nvdm(&smartconfigured);
-	    printf("get_cf_ready configured =%d,opmode = %d,smartconfigured =%d\r\n",configured,config.opmode,smartconfigured);
-        if (!configured) { // not configured
-#ifdef MTK_SMTCN_ENABLE
-            /* Config-Free Demo */
-            if (wifi_config.opmode == 1&&(smartconfigured!=1)) {
-                mtk_smart_connect();
-				set_smart_conf_to_nvdm(1);
-				save_cf_ready_to_nvdm(1);
-				//save_smt_result_to_nvdm();
-            }
-#endif
-        }
-		
-#endif /* MTK_WIFI_CONFIGURE_FREE_ENABLE */
+	
+
+//#ifdef MTK_WIFI_CONFIGURE_FREE_ENABLE
+//        uint8_t configured = 0;
+//        register_configure_free_callback(save_cf_credential_to_nvdm,  save_cf_ready_to_nvdm);
+//        get_cf_ready_to_nvdm(&configured);
+//		uint8_t smartconfigured = 0;
+//		get_smart_conf_to_nvdm(&smartconfigured);
+//	    printf("get_cf_ready configured =%d,opmode = %d,smartconfigured =%d\r\n",configured,config.opmode,smartconfigured);
+//        if (!configured) { // not configured
+//#ifdef  MTK_SMTCN_ENABLE
+//            /* Config-Free Demo */
+//            if (wifi_config.opmode == 1&&(smartconfigured!=1))
+//			{
+//                mtk_smart_connect();
+//				set_smart_conf_to_nvdm(1);
+//				save_cf_ready_to_nvdm(1);
+//				//save_smt_result_to_nvdm();
+//            }
+//#endif
+//        }
+//		
+//#endif /* MTK_WIFI_CONFIGURE_FREE_ENABLE */
 
 #if defined(MTK_MINICLI_ENABLE)
     /* Initialize cli task to enable user input cli command from uart port.*/

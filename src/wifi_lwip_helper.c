@@ -77,7 +77,7 @@ static void ip_ready_callback(struct netif *netif)
             LOG_I(common, "DHCP got IP:%s", ip_addr);
             LOG_I(common, "************************");
 			//wifi_profile_set_configfree(1);
-			user_wifi_init_query_status();
+			user_wifi_status_ipready();
         } else {
             LOG_E(common, "DHCP got Failed");
         }

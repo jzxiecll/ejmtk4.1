@@ -23,12 +23,10 @@ typedef enum
 	EJ_EVENT_reApplyIDSem,
 	EJ_EVENT_timeSyncSem,
 	EJ_EVENT_routerConnectingSem,
-
-
+	EJ_EVENT_homeApNotConfiguredSem
 }ej_event_t;
 
-uint8_t  initEventManager();
-int  EJ_initEventManager();
+int  EJ_EventManagerInit();
 
 
 uint8_t putShouldUARTThreadWorkSem();

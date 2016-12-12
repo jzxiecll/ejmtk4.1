@@ -17,6 +17,7 @@
 log_create_module(joycfg, PRINT_LEVEL_INFO);
 
 #define jy_debug_log 1
+#define PRINTF_HIGH
 #ifdef  PRINTF_HIGH
 #define printf_high printf
 #else
@@ -255,13 +256,13 @@ static int jy_get_result_NoEncode(joycfg_context_t* context, joycfg_result_t* re
 	uint8_t passwordLen;
 
 	memset(result,0,sizeof(joycfg_result_t));
-    result->ssid_length= jy_context->payload[5];
+    result->ssid_length= jy_context->payload[6];
 	
-	result->pwd_length = jy_context->payload[6];
+	result->pwd_length = jy_context->payload[7];
 	
-    jy_conf.memcpy(result->ssid, &(jy_context->payload[0])+7, result->ssid_length);			
+    jy_conf.memcpy(result->ssid, &(jy_context->payload[0])+8, result->ssid_length);			
     
-    jy_conf.memcpy(result->pwd, &(jy_context->payload[0])+7+result->ssid_length, result->pwd_length);
+    jy_conf.memcpy(result->pwd, &(jy_context->payload[0])+8+result->ssid_length, result->pwd_length);
 	
 
 	LOG_I(joycfg,"passwordLen:%02d,ssid_length:%02d\n",result->pwd_length,result->ssid_length);
@@ -392,8 +393,10 @@ static int payLoadCheckNoEncode(uint8_t index)
 		if(jy_context->payload[i]==0)
 			return 1;
 	}
-	sumNoEncode = ((CalcSum(jy_context->payload+5, index-5) + 10)& 0xFF);
+	//sumNoEncode = ((CalcSum(jy_context->payload+5, index-5) + 10)& 0xFF);
 
+	sumNoEncode = ((CalcSum(jy_context->payload+6, index-6) + 10)& 0xFF);
+	
 	printf_high("[payLoadCheckNoEncode]:Sum->%02d:Crc->%02d\r\n", sumNoEncode ,crcNoEncode);
 	
 	if(sumNoEncode == (jy_context->payload[index])){

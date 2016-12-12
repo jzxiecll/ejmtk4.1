@@ -50,11 +50,15 @@ void setupAtTaskTimer()
 void initMainLoop(uint8_t isHomeAPConfig)
 {
 
-//	EJ_Printf("Build Time: "__DATE__" "__TIME__"\r\n");
+	EJ_Printf("Build Time: "__DATE__" "__TIME__"\r\n");
 	int ret =0;
-	if (isHomeAPConfig) {
-		SetWifiModuleStatusIsHomeAPConfig(HOMEAP_CONFIGURED);
+	
+	SetWifiModuleStatusIsHomeAPConfig(isHomeAPConfig);
+	
+	if (!isHomeAPConfig) {
+		EJ_PutEventSem(EJ_EVENT_homeApNotConfiguredSem);
 	}
+	
 	ret = EJ_thread_create(&mainLoop_thread,
 		"mainLoop",
 		(void *)mainLoop, 0,
@@ -308,7 +312,20 @@ static void EJ_event_timeSyncProcess(void* data)
 
 }
 
+static void EJ_event_homeApNotConfiguredProcess(void* data)
+{
 
+	unsigned char configMode = GetWifiConfigConfigMode();
+
+	if (configMode == WIFICONFIG_NULL_MODE) {
+
+		configMode = GetDeviceInfoDefaultConfigMode();
+	}
+	
+	EJ_WifiConfigProcess(configMode);
+		
+
+}
 
 
 static void EJ_default_process()
@@ -489,6 +506,11 @@ static void  EJ_event_handler(ej_event_t event,void *data)
 						EJ_event_timeSyncProcess(NULL);
 						break;
 					}
+				case  EJ_EVENT_homeApNotConfiguredSem:
+					{	
+						EJ_event_homeApNotConfiguredProcess(NULL);
+						break;
+					}
 				default:
 					//EJ_default_process();
 					break;
@@ -510,9 +532,6 @@ void  EJ_Event_Process(void *data)
 	}
 	EJ_Packet_Process(NULL);	
 }
-
-
-
 
 void mainLoop(void* arg)
 {
@@ -613,8 +632,10 @@ void mainLoop(void* arg)
 							EJ_App_network_configured(0);
 							EJ_App_psm_erase();
 							EJ_App_reboot(REASON_USER_REBOOT);
-						}else{
-							if(GetWifiModuleStatusIsHomeAPConfig() == HOMEAP_NOT_CONFIGURED){
+						}else
+						{
+							if(GetWifiModuleStatusIsHomeAPConfig() == HOMEAP_NOT_CONFIGURED)
+							{
 								EJ_App_network_configured(0);
 								EJ_App_reboot(REASON_USER_REBOOT);
 							}

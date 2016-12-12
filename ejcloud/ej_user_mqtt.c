@@ -98,7 +98,7 @@ extern EJ_DevInfo_t _g_dev;
  void EJ_messageArrived(MessageData* m)
 
 {
-	//EJ_Printf("EJ_messageArrived \r\n");
+	EJ_Printf("EJ_messageArrived \r\n");
 	uint8_t *data = (uint8_t *)(m->message->payload);
 	wifi2CloudPacket *pPacket = (wifi2CloudPacket *)EJ_mem_malloc(sizeof(wifi2CloudPacket));
 	if (pPacket) {		

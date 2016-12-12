@@ -1,6 +1,6 @@
 #include "ej_port_wlan.h"
 #include "wifi_api.h"
-
+#include "ej_wificonfig.h"
 EJ_DevInfo_t _g_dev;
 
 static  int ej_get_mac_address(uint8_t *mac)
@@ -39,14 +39,23 @@ int    EJ_App_reboot(uint8_t reason)
 
 
 
-int   EJ_App_network_configured(int state)
+int   EJ_App_network_configured(unsigned char state)
 {
 
-	//return     app_network_set_nw_state(state);
+	joycfg_profile_set_configfree(state);
+	
 	return 0;
 
 }
 
+int   EJ_App_network_configured_status(unsigned char *state)
+{
+
+	joycfg_profile_get_configfree(state);
+	EJ_Printf("ej_configured = %d\r\n",*state);
+	return 0;
+
+}
 
 
 int  EJ_App_psm_erase()

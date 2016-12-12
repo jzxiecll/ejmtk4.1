@@ -4,7 +4,7 @@ ej_queue_t *ejEventQueue;
 
 static ej_queue_pool_define(ejEventQueueData, 10*sizeof(uint8_t*));
 
-int  EJ_initEventManager()
+int  EJ_EventManagerInit()
 {
 
 	int  ret = 0;	
@@ -12,12 +12,12 @@ int  EJ_initEventManager()
 	if(ejEventQueue != NULL){		
 		if (EJ_queue_create(ejEventQueue, "ejEventQueue", sizeof(void *) , &ejEventQueueData) != EJ_SUCCESS) {	
 		  ret = 1;	
-		  EJ_ErrPrintf(("EJ_initEventManager failed.\r\n"));
+		  EJ_ErrPrintf(("EJ_EventManagerInit failed.\r\n"));
 		}else{
-		  EJ_DebugPrintf(("EJ_initEventManager success.\r\n"));
+		  EJ_DebugPrintf(("EJ_EventManagerInit success.\r\n"));
 		}
 	}else{
-		EJ_DebugPrintf(("EJ_initEventManager failed for malloc.\r\n"));
+		EJ_DebugPrintf(("EJ_EventManagerInit failed for malloc.\r\n"));
 		ret = -1 ;
 	}
 	return ret;
