@@ -17,7 +17,7 @@
 log_create_module(joycfg, PRINT_LEVEL_INFO);
 
 #define jy_debug_log 1
-#define PRINTF_HIGH
+
 #ifdef  PRINTF_HIGH
 #define printf_high printf
 #else

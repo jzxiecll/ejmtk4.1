@@ -112,7 +112,7 @@ extern EJ_DevInfo_t _g_dev;
 		pPacket->dataLen[3] = data[7];
 		//EJ_Printf("EJ_messageArrived dataLen[0]=%d ,payloadlen =%d \r\n",pPacket->dataLen[0],m->message->payloadlen);
 		memset(text,0,256);
-		if (EJ_Aes_Decrypt((unsigned char *)(data + 8), m->message->payloadlen - 8 - 16, text) != 0)
+		if (EJ_Aes_Decrypt((unsigned char *)(data + 8), m->message->payloadlen - 8 - 16, text) == 0)
 		{
 			EJ_Printf("error EJ_Aes_Decrypt\r\n");
 			EJ_mem_free(pPacket);
@@ -254,8 +254,10 @@ void EJ_user_pub_Wifi2CloudPacket(wifi2CloudPacket *pPacket, char *topicName)
 
 			memcpy(buf, temp + 8, 20);
 			memcpy(buf + 20, pPacket->data, pPacket->dataLen[0] - 20 - 16 - 8);	
-			int cipherSize = EJ_Aes_Encrypt(buf, pPacket->dataLen[0] - 16 - 8, cipher);
-
+			
+			//aes_result_dump(buf, pPacket->dataLen[0] - 16 - 8);
+			int cipherSize = EJ_Aes_Encrypt(buf, (unsigned int)pPacket->dataLen[0] - 16 - 8, cipher);
+			//aes_result_dump(cipher, cipherSize);
 			if (cipherSize) {
 				
 				uint8_t *payload = (uint8_t *)EJ_mem_malloc(8 + cipherSize + strlen(ethersignStr));
