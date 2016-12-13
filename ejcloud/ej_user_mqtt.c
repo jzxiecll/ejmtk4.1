@@ -279,7 +279,7 @@ void EJ_user_pub_Wifi2CloudPacket(wifi2CloudPacket *pPacket, char *topicName)
 					EJ_mem_free(payload);
 
 				}else {
-					EJ_ErrPrintf(("[MQTTThread.c][PubWifi2CloudPacket][ERROR]: EJ_mem_malloc failed.\r\n"));
+					EJ_ErrPrintf(("[ej_user_mqtt.c][PubWifi2CloudPacket][ERROR1]: EJ_mem_malloc failed.\r\n"));
 				}
 
 			}
@@ -287,7 +287,7 @@ void EJ_user_pub_Wifi2CloudPacket(wifi2CloudPacket *pPacket, char *topicName)
 			EJ_mem_free(buf);
 			
 		}else {
-			EJ_ErrPrintf(("[MQTTThread.c][PubWifi2CloudPacket][ERROR]: EJ_mem_malloc failed.\r\n"));
+			EJ_ErrPrintf(("[ej_user_mqtt.c][PubWifi2CloudPacket][ERROR2]: EJ_mem_malloc failed.\r\n"));
 		}
 	}
 	else {
@@ -482,11 +482,6 @@ opts_struct * GenerateMQTTConnectionerOpts()
 
 	return opt;
 }
-
-
-
-
-
 
 int EJ_user_init_MQTTThread(){
 	static int i = 0;

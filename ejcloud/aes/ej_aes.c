@@ -528,7 +528,7 @@ unsigned char* aes_crypt_ecb( aes_context* ctx, int mode, const unsigned char* i
         n = 16 - ( slen & 15 );
         *dlen = slen + n;
 
-        output = ( unsigned char* )malloc( *dlen );
+        output = ( unsigned char* )EJ_mem_malloc( *dlen );
         if ( !output )
         {
             return NULL;
@@ -550,7 +550,7 @@ unsigned char* aes_crypt_ecb( aes_context* ctx, int mode, const unsigned char* i
     }
     else
     {
-        output = ( unsigned char* )malloc( slen );
+        output = ( unsigned char* )EJ_mem_malloc( slen );
         if ( !output )
         {
             return NULL;
@@ -643,11 +643,12 @@ static void md5_result_dump(uint8_t *result, uint8_t length)
 int EJ_Aes_Encrypt(unsigned char *pPlainTxt, unsigned int TextLen, unsigned char *pCipTxt)
 {
 		aes_context ctx;
-		unsigned char *in_new;
+		unsigned char *result;
 		int slen;
 		aes_setkey_enc(&ctx, KEK, sizeof(KEK));
-		in_new = aes_crypt_ecb(&ctx, AES_ENCRYPT, pPlainTxt, TextLen, &slen);
-		memcpy(pCipTxt,in_new,slen);
+		result = aes_crypt_ecb(&ctx, AES_ENCRYPT, pPlainTxt, TextLen, &slen);
+		memcpy(pCipTxt,result,slen);
+		EJ_mem_free(result);
 		return  slen;
 }
 
@@ -655,14 +656,14 @@ int EJ_Aes_Encrypt(unsigned char *pPlainTxt, unsigned int TextLen, unsigned char
 int EJ_Aes_Decrypt(unsigned char *pCipTxt, unsigned int CipTxtLen, unsigned char *pPlainTxt)
 {
 		aes_context ctx;
-		unsigned char *in_new;
+		unsigned char *result;
 		int slen;
 		aes_setkey_dec(&ctx, KEK, sizeof(KEK));		
-		in_new = aes_crypt_ecb(&ctx, AES_DECRYPT, pCipTxt, CipTxtLen, &slen);		
-		memcpy(pPlainTxt,in_new,slen);	
-
+		result = aes_crypt_ecb(&ctx, AES_DECRYPT, pCipTxt, CipTxtLen, &slen);		
+		memcpy(pPlainTxt,result,slen);	
+		EJ_mem_free(result);	
 		if(slen < 20)
-			return 0;
+				return 0;
 		return  slen;
 
 }
