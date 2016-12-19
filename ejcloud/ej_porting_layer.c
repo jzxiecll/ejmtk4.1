@@ -376,3 +376,57 @@ int MutexUnlock(Mutex* m)
 }
 
 
+static inline int EJ_semaphore_create(ej_semaphore_t *mhandle, const char *name)
+{
+	vSemaphoreCreateBinary(*mhandle);
+	if (*mhandle) {
+		
+		return EJ_SUCCESS;
+	}
+	else
+		return -EJ_FAIL;
+	
+}
+
+static inline int EJ_semaphore_take(ej_semaphore_t *mhandle, unsigned long wait)
+{
+	int ret;
+	signed portBASE_TYPE xHigherPriorityTaskWoken = ejFALSE;
+	if (!mhandle || !(*mhandle))
+		return -EJ_E_INVAL;
+	
+	if (is_isr_context()) {
+		
+		ret = xSemaphoreTakeFromISR(*mhandle,
+					    &xHigherPriorityTaskWoken);
+		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+	} else
+		ret = xSemaphoreTake(*mhandle, wait);
+	return ret == ejTRUE ? EJ_SUCCESS : -EJ_FAIL;
+}
+
+static inline int EJ_semaphore_give(ej_semaphore_t *mhandle)
+{
+	int ret;
+	signed portBASE_TYPE xHigherPriorityTaskWoken = ejFALSE;
+	if (!mhandle || !(*mhandle))
+		return -EJ_E_INVAL;
+	if (is_isr_context()) {
+		
+		ret = xSemaphoreGiveFromISR(*mhandle,
+					    &xHigherPriorityTaskWoken);
+		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+	} else
+		ret = xSemaphoreGive(*mhandle);
+	return ret == ejTRUE ? EJ_SUCCESS : -EJ_FAIL;
+}
+
+
+static inline int EJ_semaphore_delete(ej_semaphore_t *mhandle)
+{
+	vSemaphoreDelete(*mhandle);
+
+	*mhandle = NULL;
+	return EJ_SUCCESS;
+}
+

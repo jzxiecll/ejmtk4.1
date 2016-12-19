@@ -497,10 +497,10 @@ int EJ_user_init_MQTTThread(){
 		
 		i = 1;
 	}
-	EJ_Printf("Call GenerateMQTTConnectionerOpts success \r\n");
+	
 
 	if (EJ_user_connectServer() != MQTT_CONNECTED_SUCCESS) {
-		
+		EJ_Printf("Call EJ_user_connectServer failed! \r\n");
 		return INIT_MQTT_CONNECTION_ERROR;
 	}
 
@@ -538,7 +538,7 @@ int EJ_user_init_MQTTThread(){
 
 		EJ_task_Resume(MQTTReceiveThread_thread);
 	}
-	EJ_Printf("Call GenerateMQTTConnectionerOpts success \r\n");
+	EJ_Printf("Call EJ_user_init_MQTTThread success \r\n");
 
 	return INIT_MQTT_SUCCESS;
 

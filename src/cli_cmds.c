@@ -39,7 +39,7 @@
 
 
 #include "minicli_cmd_table.h"
-
+#include "app_cli.h"
 
 static cli_t *_cli_ptr;
 
@@ -134,6 +134,7 @@ static cmd_t   _cmds_normal[] = {
     GOTO_EXAMPLE_MODE_CLI_ENTRY
     MINICLI_NORMAL_MODE_CLI_CMDS
     OS_CLI_ENTRY
+    EJ_CLI_SMNT_ENTRY
     { NULL, NULL, NULL, NULL }
 };
 

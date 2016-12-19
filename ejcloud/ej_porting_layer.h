@@ -159,6 +159,7 @@ int EJ_queue_delete(ej_queue_t *qhandle);
 *
 ************************************************************************
 */
+typedef xSemaphoreHandle ej_semaphore_t;
 
 #if 0
 typedef QueueHandle_t ej_semaphore_t;

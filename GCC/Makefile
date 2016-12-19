@@ -174,6 +174,7 @@ APP_FILES      += $(APP_PATH_SRC)/wifi_nvdm_config.c
 APP_FILES      += $(APP_PATH_SRC)/ept_gpio_var.c
 APP_FILES      += $(APP_PATH_SRC)/ept_eint_var.c
 APP_FILES      += $(APP_PATH_SRC)/app_common.c
+APP_FILES      += $(APP_PATH_SRC)/app_cli.c
 APP_FILES      += $(APP_PATH)/GCC/syscalls.c
 APP_FILES      += $(APP_PATH)/ejcloud/aes/ej_aes.c
 APP_FILES      += $(APP_PATH)/ejcloud/log/ej_log.c
