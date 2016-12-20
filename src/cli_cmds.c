@@ -135,6 +135,8 @@ static cmd_t   _cmds_normal[] = {
     MINICLI_NORMAL_MODE_CLI_CMDS
     OS_CLI_ENTRY
     EJ_CLI_SMNT_ENTRY
+    EJ_CLI_DID
+    EJ_CLI_UUID
     { NULL, NULL, NULL, NULL }
 };
 

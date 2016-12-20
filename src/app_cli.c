@@ -25,4 +25,43 @@ unsigned char ej_smart_config_test(unsigned char len, unsigned char *param[])
     return 0;
 }
 
+unsigned char ej_cli_read_item(unsigned char *keyname)
+{
+	char tmp[256];
+    int  nvdm_len = sizeof(tmp);
+    int  status;
+    status = EJ_read_psm_item(keyname,
+                                     (unsigned char *)tmp,
+                                     nvdm_len);
+    if (status == 0) {
+        printf("%s",keyname);
+        printf(" = ");
+        printf("%s",tmp);
+        printf("\r\n");
+    } else {
+        printf("the data item is not exist");
+        printf("\r\n");
+    }
+    return 0;
+}
+
+unsigned char ej_cli_write_item(unsigned char *keyname)
+{
+
+    return 0;
+}
+
+
+unsigned char ej_cli_uuid()
+{
+  	ej_cli_read_item("UUID");
+    return 0;
+}
+
+
+unsigned char ej_cli_Deviceid()
+{
+  	ej_cli_read_item("Deviceid");
+    return 0;
+}
 
