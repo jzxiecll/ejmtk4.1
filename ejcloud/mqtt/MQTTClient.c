@@ -33,19 +33,19 @@ static int sendPacket(Client* c, int length, Timer* timer)
     sent = 0;
     
   while (sent < length && !expired(timer))
-    {
+  {
       rc = c->ipstack->mqttwrite(c->ipstack, &c->buf[sent], length, left_ms(timer));
       if (rc < 0)  // there was an error writing the data
-	break;
+		break;
       sent += rc;
-    }
+  }
   if (sent == length)
-    {
+  {
       countdown_ms(&c->ping_timer, c->keepAliveInterval*1000); // record the fact that we have successfully sent the packet    
       rc = MQTT_SUCCESS;
-    }
+  }
   else
-    rc = FAILURE;
+      rc = FAILURE;
   return rc;
 }
 
@@ -88,20 +88,20 @@ static int decodePacket(Client* c, int* value, int timeout)
 
   *value = 0;
   do
-    {
+  {
       int rc = MQTTPACKET_READ_ERROR;
 
       if (++len > MAX_NO_OF_REMAINING_LENGTH_BYTES)
-        {
-	  rc = MQTTPACKET_READ_ERROR; /* bad data */
-	  goto exit;
-        }
+      {
+		  rc = MQTTPACKET_READ_ERROR; /* bad data */
+		  goto exit;
+      }
       rc = c->ipstack->mqttread(c->ipstack, &i, 1, timeout);
       if (rc != 1)
-	goto exit;
+		  goto exit;
       *value += (i & 127) * multiplier;
       multiplier *= 128;
-    } while ((i & 128) != 0);
+   } while ((i & 128) != 0);
  exit:
   return len;
 }
@@ -144,22 +144,22 @@ static char isTopicMatched(char* topicFilter, MQTTString* topicName)
   char* curn_end = curn + topicName->lenstring.len;
     
   while (*curf && curn < curn_end)
-    {
+  {
       if (*curn == '/' && *curf != '/')
-	break;
+			break;
       if (*curf != '+' && *curf != '#' && *curf != *curn)
-	break;
+			break;
       if (*curf == '+')
-        {   // skip until we meet the next separator, or end of string
-	  char* nextpos = curn + 1;
-	  while (nextpos < curn_end && *nextpos != '/')
-	    nextpos = ++curn + 1;
-        }
+      {   // skip until we meet the next separator, or end of string
+	 		 char* nextpos = curn + 1;
+	  		 while (nextpos < curn_end && *nextpos != '/')
+	   		 nextpos = ++curn + 1;
+      }
       else if (*curf == '#')
-	curn = curn_end - 1;    // skip until end of string
+		curn = curn_end - 1;    // skip until end of string
       curf++;
       curn++;
-    };
+  };
     
   return (curn == curn_end) && (*curf == '\0');
 }
@@ -172,27 +172,27 @@ static int deliverMessage(Client* c, MQTTString* topicName, MQTTMessage* message
 
   // we have to find the right message handler - indexed by topic
   for (i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
-    {
+  {
       if (c->messageHandlers[i].topicFilter != 0 && (MQTTPacket_equals(topicName, (char*)c->messageHandlers[i].topicFilter) ||
 						     isTopicMatched((char*)c->messageHandlers[i].topicFilter, topicName)))
         {
-	  if (c->messageHandlers[i].fp != NULL)
+	  		if (c->messageHandlers[i].fp != NULL)
             {
-	      MessageData md;
-	      NewMessageData(&md, topicName, message);
-	      c->messageHandlers[i].fp(&md);
-	      rc = MQTT_SUCCESS;
+		      MessageData md;
+		      NewMessageData(&md, topicName, message);
+		      c->messageHandlers[i].fp(&md);
+		      rc = MQTT_SUCCESS;
             }
         }
-    }
+  }
     
   if (rc == FAILURE && c->defaultMessageHandler != NULL) 
-    {
+  {
       MessageData md;
       NewMessageData(&md, topicName, message);
       c->defaultMessageHandler(&md);
       rc = MQTT_SUCCESS;
-    }   
+  }   
     
   return rc;
 }
@@ -201,42 +201,36 @@ static int deliverMessage(Client* c, MQTTString* topicName, MQTTMessage* message
 static  int keepalive(Client* c)
 {
   int rc = MQTT_SUCCESS;
-
   if (c->keepAliveInterval == 0)
-    {
-      rc = MQTT_SUCCESS;
-      goto exit;
-    }
+  {
+	  rc = MQTT_SUCCESS;
+	  goto exit;
+  }
 
   if (expired(&c->ping_timer))
-    {
+  {
       if (!c->ping_outstanding)
-        {
-	  Timer timer;
-	  InitTimer(&timer);
-	  countdown_ms(&timer, 1000);
-	  int len = MQTTSerialize_pingreq(c->buf, c->buf_size);
-	  if (len > 0 && (rc = sendPacket(c, len, &timer)) == MQTT_SUCCESS) // send the ping packet
-	    {
-	      countdown_ms(&c->pingresp_timer, c->command_timeout_ms);
-		  c->ping_outstanding = 1;
-	      EJ_DebugPrintf(("[MQTTClient.c][keepalive][INFO]: send ping request.\r\n"));
-
-	     rc = MQTT_SUCCESS;
-	    }
-	  else {
-	    EJ_ErrPrintf(("[MQTTClient.c][keepalive][ERROR]: send ping failed.\r\n"));
-
-	    rc = FAILURE;
-	  }
-
-			
-        }
-
+      {
+		  Timer timer;
+		  InitTimer(&timer);
+		  countdown_ms(&timer, 1000);
+		  int len = MQTTSerialize_pingreq(c->buf, c->buf_size);
+		  if (len > 0 && (rc = sendPacket(c, len, &timer)) == MQTT_SUCCESS) // send the ping packet
+		  {
+		      countdown_ms(&c->pingresp_timer, c->command_timeout_ms);
+			  c->ping_outstanding = 1;
+		      EJ_DebugPrintf(("[MQTTClient.c][keepalive][INFO]: send ping request.\r\n"));
+		      rc = MQTT_SUCCESS;
+		  }
+		  else 
+		  {
+		    EJ_ErrPrintf(("[MQTTClient.c][keepalive][ERROR]: send ping failed.\r\n"));
+		    rc = FAILURE;
+		  }	
+      }
       c->ping_outstanding = 1;
     }
-
- exit:
+exit:
   return rc;
 }
 
@@ -246,75 +240,73 @@ static int cycle(Client* c, Timer* timer)
   // read the socket, see what work is due
   unsigned short packet_type = readPacket(c, timer);
     
-  int len = 0,
-    rc = MQTT_SUCCESS;
+  int len = 0,rc = MQTT_SUCCESS;
 
   switch (packet_type)
-    {
+  {
     case CONNACK:
     case PUBACK:
     case SUBACK:
-      break;
+     		 break;
     case PUBLISH:
-      {
-	MQTTString topicName;
-	MQTTMessage msg;
-	if (MQTTDeserialize_publish((unsigned char*)&msg.dup, (int*)&msg.qos, (unsigned char*)&msg.retained, (unsigned short*)&msg.id, &topicName,
-				    (unsigned char**)&msg.payload, (int*)&msg.payloadlen, c->readbuf, c->readbuf_size) != 1)
-	  goto exit;
-	deliverMessage(c, &topicName, &msg);
-	if (msg.qos != QOS0)
-	  {
-	    if (msg.qos == QOS1)
-	      len = MQTTSerialize_ack(c->buf, c->buf_size, PUBACK, 0, msg.id);
-	    else if (msg.qos == QOS2)
-	      len = MQTTSerialize_ack(c->buf, c->buf_size, PUBREC, 0, msg.id);
-	    if (len <= 0)
-	      rc = FAILURE;
-	    else {
-	
-	      Timer acktimer;
-	      InitTimer(&acktimer);
-	      countdown_ms(&acktimer, 20);
-	      rc = sendPacket(c, len, &acktimer);
-	    }
+    {
+		MQTTString topicName;
+		MQTTMessage msg;
+		if (MQTTDeserialize_publish((unsigned char*)&msg.dup, (int*)&msg.qos, (unsigned char*)&msg.retained, (unsigned short*)&msg.id, &topicName,
+					    (unsigned char**)&msg.payload, (int*)&msg.payloadlen, c->readbuf, c->readbuf_size) != 1)
+		  	goto exit;
+		deliverMessage(c, &topicName, &msg);
+		if (msg.qos != QOS0)
+		{
+		    if (msg.qos == QOS1)
+		      len = MQTTSerialize_ack(c->buf, c->buf_size, PUBACK, 0, msg.id);
+		    else if (msg.qos == QOS2)
+		      len = MQTTSerialize_ack(c->buf, c->buf_size, PUBREC, 0, msg.id);
+		    if (len <= 0)
+		      rc = FAILURE;
+		    else {
+		
+		      Timer acktimer;
+		      InitTimer(&acktimer);
+		      countdown_ms(&acktimer, 20);
+		      rc = sendPacket(c, len, &acktimer);
+		    }
 
-	    if (rc == FAILURE)
-	      goto exit; // there was a problem
-	  }
-	
-            
-	break;
-      }
+		    if (rc == FAILURE)
+		      goto exit; // there was a problem
+		}        
+		break;
+    }
     case PUBREC:
-      {
-	unsigned short mypacketid;
-	unsigned char dup, type;
-	if (MQTTDeserialize_ack(&type, &dup, &mypacketid, c->readbuf, c->readbuf_size) != 1)
-	  rc = FAILURE;
-	else if ((len = MQTTSerialize_ack(c->buf, c->buf_size, PUBREL, 0, mypacketid)) <= 0)
-	  rc = FAILURE;
-	else if ((rc = sendPacket(c, len, timer)) != MQTT_SUCCESS) // send the PUBREL packet
-	  rc = FAILURE; // there was a problem
-	if (rc == FAILURE)
-	  goto exit; // there was a problem
-	break;
-      }
+    {
+		unsigned short mypacketid;
+		unsigned char dup, type;
+		if (MQTTDeserialize_ack(&type, &dup, &mypacketid, c->readbuf, c->readbuf_size) != 1)
+		  rc = FAILURE;
+		else if ((len = MQTTSerialize_ack(c->buf, c->buf_size, PUBREL, 0, mypacketid)) <= 0)
+		  rc = FAILURE;
+		else if ((rc = sendPacket(c, len, timer)) != MQTT_SUCCESS) // send the PUBREL packet
+		  rc = FAILURE; // there was a problem
+		if (rc == FAILURE)
+		  goto exit; // there was a problem
+		break;
+    }
     case PUBCOMP:
       break;
     case PINGRESP:
       c->ping_outstanding = 0;
 	  // countdown_ms(&c->ping_timer, c->keepAliveInterval*1000);
       break;
-    }
+  }
+  
   keepalive(c);
 
   if (c->ping_outstanding && expired(&c->pingresp_timer))
-    {
+  {
       //c->ping_outstanding = 0;
 	  c->ping_outstanding = 0;
       rc = CONNECTION_LOST;
-    }
+  }
 
  exit:
   if (rc == MQTT_SUCCESS)
@@ -335,29 +327,23 @@ int MQTTYield(Client* c, int timeout_ms)
   ret = MQTT_SUCCESS;
 
   while (!expired(&timer))
-    {
+  {
 
       MutexLock(&c->mutex);
 
       rc1 = cycle(c, &timer);
-
       if (rc1 == FAILURE)
-        {
-	  ret = FAILURE;
-
-	}else if (rc1 == CONNECTION_LOST)
-        {
-	  ret = CONNECTION_LOST;
-	}else {
-
+      {
+	  	ret = FAILURE;
+	  }else if (rc1 == CONNECTION_LOST)
+      {
+	    ret = CONNECTION_LOST;
+	  }else {
 			
       }
-
-	
+	  
       MutexUnlock(&c->mutex);
-
-    }
-        
+  }        
   return ret;
 }
 
@@ -368,10 +354,10 @@ static int waitfor(Client* c, int packet_type, Timer* timer)
   int rc = FAILURE;
     
   do
-    {
-      if (expired(timer)) 
-	break; // we timed out
-    }
+  {
+    if (expired(timer)) 
+		break; // we timed out
+  }
   while ((rc = cycle(c, timer)) != packet_type);  
     
   return rc;
@@ -401,30 +387,30 @@ int MQTTConnect(Client* c, MQTTPacket_connectData* options)
   if ((len = MQTTSerialize_connect(c->buf, c->buf_size, options)) <= 0)
     goto exit;
   if ((rc = sendPacket(c, len, &connect_timer)) != MQTT_SUCCESS)
-  	{// send the connect packet
+  {// send the connect packet
 
 		 EJ_Printf("========================sendPacket %d\r\n\r\n",left_ms(&connect_timer));
    		 goto exit; // there was a problem
-  	}
+  }
   // this will be a blocking call, wait for the connack
   if (waitfor(c, CONNACK, &connect_timer) == CONNACK)
-    {
+  {
       unsigned char connack_rc = 255;
       char sessionPresent = 0;
       if (MQTTDeserialize_connack((unsigned char*)&sessionPresent, &connack_rc, c->readbuf, c->readbuf_size) == 1)
 		rc = connack_rc;
       else
 		rc = FAILURE;
-    }
+  }
   else{
-  		 EJ_Printf("***********************waitfor ACK timeout!\r\n \r\n");
-		 rc = FAILURE;
+	  EJ_Printf("***********************waitfor ACK timeout!\r\n \r\n");
+	  rc = FAILURE;
   }
    
     
  exit:
   if (rc == MQTT_SUCCESS)
-    c->isconnected = 1;
+      c->isconnected = 1;
 
   MutexUnlock(&c->mutex);
 
@@ -455,33 +441,32 @@ int MQTTSubscribe(Client* c, const char* topicFilter, enum QoS qos, messageHandl
     goto exit;             // there was a problem
     
   if (waitfor(c, SUBACK, &timer) == SUBACK)      // wait for suback 
-    {
+  {
       int count = 0, grantedQoS = -1;
       unsigned short mypacketid;
       if (MQTTDeserialize_suback(&mypacketid, 1, &count, &grantedQoS, c->readbuf, c->readbuf_size) == 1)
-	rc = grantedQoS; // 0, 1, 2 or 0x80 
+			rc = grantedQoS; // 0, 1, 2 or 0x80 
       if (rc != 0x80)
-        {
-	  int i;
-	  for (i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
-            {
-	      if (c->messageHandlers[i].topicFilter == 0)
-                {
-		  c->messageHandlers[i].topicFilter = topicFilter;
-		  c->messageHandlers[i].fp = messageHandler;
-		  rc = 0;
-		  break;
-                }
-            }
-        }
-    }
+      {
+		  int i;
+		  for (i = 0; i < MAX_MESSAGE_HANDLERS; ++i)
+	      {
+		      if (c->messageHandlers[i].topicFilter == 0)
+	          {
+				  c->messageHandlers[i].topicFilter = topicFilter;
+				  c->messageHandlers[i].fp = messageHandler;
+				  rc = 0;
+				  break;
+	          }
+	     }
+      }
+  }
   else 
     rc = FAILURE;
         
  exit:
 
   MutexUnlock(&c->mutex);
-
   return rc;
 }
 
@@ -508,18 +493,17 @@ int MQTTUnsubscribe(Client* c, const char* topicFilter)
     goto exit; // there was a problem
     
   if (waitfor(c, UNSUBACK, &timer) == UNSUBACK)
-    {
+  {
       unsigned short mypacketid;  // should be the same as the packetid above
       if (MQTTDeserialize_unsuback(&mypacketid, c->readbuf, c->readbuf_size) == 1)
-	rc = 0; 
-    }
+		rc = 0; 
+  }
   else
-    rc = FAILURE;
+    	rc = FAILURE;
     
  exit:
 
   MutexUnlock(&c->mutex);
-
   return rc;
 }
 
@@ -547,16 +531,14 @@ int MQTTPublish(Client* c, const char* topicName, MQTTMessage* message)
 			      topic, (unsigned char*)message->payload, message->payloadlen);
   if (len <= 0)
     goto exit;
-  if ((rc = sendPacket(c, len, &timer)) != MQTT_SUCCESS) {  // send the subscribe packet
-     
+  if ((rc = sendPacket(c, len, &timer)) != MQTT_SUCCESS) 
+  {  // send the subscribe packet   
     EJ_ErrPrintf(("[MQTTClient.c][MQTTPublish][ERROR]: sendPacket failed.\r\n"));
-
     goto exit; // there was a problem
-
   }
 
   if (message->qos == QOS1)
-    {
+  {
       if (waitfor(c, PUBACK, &timer) == PUBACK)
       {
 			  unsigned short mypacketid;
@@ -569,19 +551,19 @@ int MQTTPublish(Client* c, const char* topicName, MQTTMessage* message)
 			EJ_ErrPrintf(("[MQTTClient.c][MQTTPublish][ERROR]: wait for puback timeout.\r\n"));
 			rc = FAILURE;
       }
-    }
+  }
   else if (message->qos == QOS2)
-    {
+  {
       if (waitfor(c, PUBCOMP, &timer) == PUBCOMP)
-        {
-	  unsigned short mypacketid;
-	  unsigned char dup, type;
-	  if (MQTTDeserialize_ack(&type, &dup, &mypacketid, c->readbuf, c->readbuf_size) != 1)
-	    rc = FAILURE;
-        }
+      {
+		  unsigned short mypacketid;
+		  unsigned char dup, type;
+		  if (MQTTDeserialize_ack(&type, &dup, &mypacketid, c->readbuf, c->readbuf_size) != 1)
+		    rc = FAILURE;
+      }
       else
-	rc = FAILURE;
-    }
+			rc = FAILURE;
+  }
     
  exit:
 
@@ -599,13 +581,10 @@ int MQTTDisconnect(Client* c)
   MutexLock(&c->mutex);
 
   int len = MQTTSerialize_disconnect(c->buf, c->buf_size);
-
   InitTimer(&timer);
   countdown_ms(&timer, c->command_timeout_ms);
-
   if (len > 0)
     rc = sendPacket(c, len, &timer);            // send the disconnect packet
-        
   c->isconnected = 0;
 
   MutexUnlock(&c->mutex);
