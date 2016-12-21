@@ -299,9 +299,9 @@ static int cycle(Client* c, Timer* timer)
       break;
   }
   
-  keepalive(c);
+  int kret = keepalive(c);
 
-  if (c->ping_outstanding && expired(&c->pingresp_timer))
+  if (c->ping_outstanding && expired(&c->pingresp_timer)||(kret == -1))
   {
       //c->ping_outstanding = 0;
 	  c->ping_outstanding = 0;

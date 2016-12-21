@@ -239,6 +239,7 @@ static void EJ_event_MQTTConnectionLostProcess(void* data)
 	*/
 	EJ_ErrPrintf(("[mainloop.c][mainLoop][ERROR]: receive an mqtt connection lost event.\r\n"));
 	//UnInit_MQTTThread();
+	EJ_user_uninit_MQTTThread();
 	SetWifiModuleStatusCloudServiceStatus(CLOUD_NOT_CONNECTED);
 
 }

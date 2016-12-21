@@ -19,12 +19,37 @@ unsigned char text[256];
 opts_struct *opts = NULL;
 extern EJ_DevInfo_t _g_dev;
 
+
+ static void Clear_Device2cloudQueue()
+ {
+ 	 int i;
+ 
+ 	 int packetCount = EJ_queue_get_msgs_waiting(GetDevice2cloudQueue());
+
+	 EJ_Printf("clear Device2cloudQueue Count :[%d]\r\n",packetCount);
+ 
+ 	 for(i = 0; i < packetCount; i++) 
+ 	 {
+ 		 
+ 		 
+ 		 uart2WifiPacket *pDevice2CloudPacket = NULL;
+ 
+ 		 if (EJ_queue_recv(GetDevice2cloudQueue(), &pDevice2CloudPacket, EJ_msec_to_ticks(1000)) == EJ_SUCCESS) 
+ 		 {
+ 			 /* decode uart2WifiPacket and encode wifi2CloudPacket ...*/
+ 
+ 			 EJ_PacketUartFree(pDevice2CloudPacket);	 
+ 		 }
+ 	 }
+ }
+ 
+
  void MQTTSendThread(void* n)
 {
 	int rc = 0;
 	int dataLen = 0;
 	EJ_DebugPrintf(("[MQTT_Thread][INFO]: MQTT_Thread start.\r\n"));
-
+	Clear_Device2cloudQueue();
 	for (;;)
 	{
 		/* process wifi to cloud.*/		
@@ -558,8 +583,8 @@ uint8_t EJ_user_uninit_MQTTThread()
 	//os_thread_delete(&MQTTSendThread_thread);
 	//os_thread_delete(&MQTTReceiveThread_thread);
 
-	//EJ_thread_Suspend(&MQTTSendThread_thread);
-	//EJ_thread_Suspend(&MQTTReceiveThread_thread);
+	EJ_thread_Suspend(&MQTTSendThread_thread);
+	EJ_thread_Suspend(&MQTTReceiveThread_thread);
 
 	MQTTClientDeinit(&opts->client);
 	
