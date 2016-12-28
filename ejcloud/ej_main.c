@@ -86,7 +86,7 @@ static void EJ_event_routerConnectedProcess(void* data)
 {		
 	//EJ_InfoPrintf(("[mainloop.c][mainLoop][INFO]:receive an roter connectedSem event.\r\n"));
 			/* */
-	SetWifiModuleStatusRouterStatus(ROUTER_CONNECTED);
+			SetWifiModuleStatusRouterStatus(ROUTER_CONNECTED);
 			/* if udpbroadcast module is not running. then run it.*/
 			if (GetWifiModuleStatusIsUdpBroadcastRunning() == UDPBROADCASTMODULE_NOT_RUNNING) {
 					if (EJ_init_udpbroadcast() == INIT_UDPBROADCAST_SUCCESS) {

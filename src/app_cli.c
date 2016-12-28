@@ -122,5 +122,15 @@ void ej_cli_get_softwareversion(int argc, char *argv[])
 }
 
 
+ void ej_cli_wifi_fota_http(int argc, char *argv[])
+{
+
+	//EJ_Printf("xxxxxxxx fota argc=%d,argv[0]=%s\r\n",argc,argv[0]);
+	if (argc == 1) {
+		EJ_wifi_fota_task(argv[0]);
+	}else {
+		EJ_ErrPrintf(("[ERROR]: wifi fota http error argc!\r\n"));
+	}
+}
 
 

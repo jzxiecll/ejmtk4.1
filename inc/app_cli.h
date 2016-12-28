@@ -22,6 +22,7 @@ void ej_cli_modify_server(int argc, char *argv[]);
 void ej_cli_modify_clouddomain_addr(int argc, char *argv[]);
 void ej_cli_set_log_level(int argc, char *argv[]);
 void ej_cli_get_softwareversion(int argc, char *argv[]);
+void ej_cli_wifi_fota_http(int argc, char *argv[]);
 
 
 
@@ -34,6 +35,7 @@ void ej_cli_get_softwareversion(int argc, char *argv[]);
 #define EJ_CLI_MLL		{"mll", "<Ejcloud modify log level>", ej_cli_set_log_level},
 #define EJ_CLI_SOFTVER  {"version", "<Ejcloud Get Software Version>", ej_cli_get_softwareversion},
 
+#define EJ_CLI_FOTA_HTTP  {"updatefw", "<Ejcloud Wifi fota http url>", ej_cli_wifi_fota_http},
 
 
 #define EJ_CLI_CMDS     EJ_CLI_SMNT_ENTRY\
@@ -42,7 +44,7 @@ void ej_cli_get_softwareversion(int argc, char *argv[]);
 						EJ_CLI_MSA\
 						EJ_CLI_MDA\
 						EJ_CLI_MLL\
-
+						EJ_CLI_FOTA_HTTP\
 
 #ifdef __cplusplus
  }

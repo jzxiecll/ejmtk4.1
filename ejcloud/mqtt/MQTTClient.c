@@ -300,8 +300,9 @@ static int cycle(Client* c, Timer* timer)
   }
   
   int kret = keepalive(c);
+ // if (c->ping_outstanding && expired(&c->pingresp_timer)||(kret == -1))
 
-  if (c->ping_outstanding && expired(&c->pingresp_timer)||(kret == -1))
+  if (c->ping_outstanding && expired(&c->pingresp_timer))
   {
       //c->ping_outstanding = 0;
 	  c->ping_outstanding = 0;

@@ -110,8 +110,8 @@ extern EJ_DevInfo_t _g_dev;
 		}
 		else if (rc == CONNECTION_LOST) {	
 			/**/
-			EJ_thread_Suspend(MQTTSendThread_thread);
-			EJ_thread_Suspend(MQTTReceiveThread_thread);		
+			//EJ_thread_Suspend(&MQTTSendThread_thread);
+			//EJ_thread_Suspend(&MQTTReceiveThread_thread);		
 			EJ_PutEventSem(EJ_EVENT_MQTTConnectionLostSem);
 			EJ_ErrPrintf(("[MQTTReceiveThread][ERROR]: MQTT connection lost.\r\n"));
 		}

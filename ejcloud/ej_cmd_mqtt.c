@@ -451,34 +451,24 @@ uint8_t Process_GetWifiModuleUpgradeResponseCB(wifi2CloudPacket *pPacket)
 	if (pPacket) {
 
 		char *httpAddr = NULL;
-
 		httpAddr = (char *)(pPacket->data + 13);
 	
 
-		if (pPacket->data[0] == 0x02) {
-		
+		if (pPacket->data[0] == 0x02) {		
 			upgradeVersion = (PacketWifiModuleUpgraeResponse *)pPacket->data;
-
 			if (upgradeVersion->ruleVersion != 0x01) {
-
 				EJ_ErrPrintf(("[Process_GetWifiModuleUpgradeResponseCB][ERROR]: version rule is not match.\r\n"));
 			}
 
 			uint8_t ret = 0x00;
-
 			if (upgradeVersion->updateType == 1) {
-
-				ret = 0x01;
-				
+				ret = 0x01;				
 			}else if (upgradeVersion->updateType == 0) {
-
 				ret = CompareWifiModuleVersion(currentVersion, upgradeVersion);
 			}			
 
 			if (ret && httpAddr != NULL) {
-
 				if(CompareWifiModuleVersion(currentVersion, upgradeVersion) == 0x00){
-
 					return 0x00;
 				}else if(CompareWifiModuleVersion(currentVersion, upgradeVersion) == 0x01 && httpAddr != NULL){
 					EJ_AlwaysPrintf(("[Process_GetWifiModuleUpgradeResponseCB][INFO]: version is not match.\r\n"));
@@ -492,47 +482,44 @@ uint8_t Process_GetWifiModuleUpgradeResponseCB(wifi2CloudPacket *pPacket)
 				EJ_Printf("version->publishWeek: %d.\r\n", currentVersion.publishWeek);
 				
 				/* upgrade software...*/
-//				struct partition_entry *p = rfget_get_passive_firmware();
+			//	struct partition_entry *p = rfget_get_passive_firmware();
 
-//				if (rfget_client_mode_update(httpAddr, p, NULL) == EJ_SUCCESS) {
-//					
-//					EJ_AlwaysPrintf(("[Process_GetWifiModuleUpgradeResponseCB][INFO]: Firmware update succeeded.\r\n"));
+				if (EJ_wifi_fota_task(httpAddr) == EJ_SUCCESS) {
+					
+					EJ_AlwaysPrintf(("[Process_GetWifiModuleUpgradeResponseCB][INFO]: Firmware update succeeded.\r\n"));
 
-//					WIFIModuleVersion version;
+					WIFIModuleVersion version;
+					version.versionRule = upgradeVersion->ruleVersion;
+					version.hardwareVersion= upgradeVersion->hardwareVersion;
+					version.softwareVersionMsb = upgradeVersion->softwareVersionMsb;
+					version.softwareVersionLsb = upgradeVersion->softwareVersionLsb;
+					version.publishYear = upgradeVersion->publishYear;
+					version.publishWeek = upgradeVersion->publishWeek;
+					version.functionCode = upgradeVersion->functionCode;
 
-//					version.versionRule = upgradeVersion->ruleVersion;
-//					version.hardwareVersion= upgradeVersion->hardwareVersion;
-//					version.softwareVersionMsb = upgradeVersion->softwareVersionMsb;
-//					version.softwareVersionLsb = upgradeVersion->softwareVersionLsb;
-//					version.publishYear = upgradeVersion->publishYear;
-//					version.publishWeek = upgradeVersion->publishWeek;
-//					version.functionCode = upgradeVersion->functionCode;
+					SetWifiModuleInfoVersion(&version);
 
-//					SetWifiModuleInfoVersion(&version);
+					#if 0
+					wifi2CloudPacket *pReportWifiModuleInfo = reportWifiUpgradeInfoToCloud();
+					EJ_PrintWifi2CloudPacket(pReportWifiModuleInfo,"wifi2CloudPacket:0x8058");
+					
+					if (nolock_list_push(GetWifi2cloudList(), pReportWifiModuleInfo) != 0x01)
+					{
+						EJ_ErrPrintf(("[MQTTThread.c][Init_MQTTThread][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+					}
 
-//					#if 0
-//					wifi2CloudPacket *pReportWifiModuleInfo = reportWifiUpgradeInfoToCloud();
-//					EJ_PrintWifi2CloudPacket(pReportWifiModuleInfo,"wifi2CloudPacket:0x8058");
-//					
-//					if (nolock_list_push(GetWifi2cloudList(), pReportWifiModuleInfo) != 0x01)
-//					{
-//						EJ_ErrPrintf(("[MQTTThread.c][Init_MQTTThread][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
-//					}
-
-//					os_thread_sleep(500);
-//					#endif
-//				} else {
-//				
-//					EJ_ErrPrintf(("[Process_GetWifiModuleUpgradeResponseCB][INFO]: Firmware update failed.\r\n"));
-//				}
+					os_thread_sleep(500);
+					#endif
+				} else {
+				
+					EJ_ErrPrintf(("[Process_GetWifiModuleUpgradeResponseCB][INFO]: Firmware update failed.\r\n"));
+				}
 
 				}
 			}
 
 			
 		}
-
-		
 
 	return 0x00;
 }
@@ -762,9 +749,7 @@ wifi2CloudPacket *reportDeviceInfoToCloud()
 			pPacket->head[1] = 0x5A;
 
 			pPacket->version = 0x04;
-
 			pPacket->crypt = 0x11;
-
 			pPacket->dataType[0] = 0x60;
 			pPacket->dataType[1] = 0x00;
 
@@ -809,7 +794,6 @@ wifi2CloudPacket *reportDeviceInfoToCloud()
 		}else {
 
 			EJ_mem_free(pPacket);
-
 			pPacket = NULL;
 		}
 		
@@ -841,12 +825,10 @@ uint8_t Process_ModifyCloudServiceAddrRequest(wifi2CloudPacket *pPacket)
 			PacketWifiModuleCloudAddrModifyRequest request;
 
 			request.defaultCloudServiceAddr = pPacket->data[0];
-			request.needModifyCloudServiceAddr = pPacket->data[1];
-			
+			request.needModifyCloudServiceAddr = pPacket->data[1];			
 			memcpy(request.cloudServiceAddrIP, pPacket->data + 2, 4);
 
 			request.dominName = (uint8_t *)EJ_mem_malloc(pPacket->dataLen[0] - 44 - 6);
-
 			memcpy(request.dominName, pPacket->data + 7, pPacket->dataLen[0] - 44 - 6);
 
 			EJ_Printf("defaultCloudServiceAddr: %d\r\n", request.defaultCloudServiceAddr);
@@ -887,9 +869,7 @@ uint8_t Process_WifiModuleRebootRequest(wifi2CloudPacket *pPacket)
 		pResponsePacket->head[1] = 0x5A;
 
 		pResponsePacket->version = 0x04;
-
 		pResponsePacket->crypt = 0x11;
-
 		pResponsePacket->dataType[0] = 0xB1;
 		pResponsePacket->dataType[1] = 0x80;
 
@@ -897,19 +877,13 @@ uint8_t Process_WifiModuleRebootRequest(wifi2CloudPacket *pPacket)
 
 		/**/
 		fillTimeStampToPackt(pResponsePacket);
-
 		GetWifiStatusDeviceID(pResponsePacket->deviceID);
-
 		PacketWifiModuleRebootResponse response;
-
 		response.response = 0x00;
-
 		pResponsePacket->data = (uint8_t *)EJ_mem_malloc(sizeof(PacketWifiModuleRebootResponse));
 
 		if (pResponsePacket->data) {
-
 			memcpy(pResponsePacket->data, (uint8_t *)&response, sizeof(PacketWifiModuleRebootResponse));
-
 			if (nolock_list_push(GetWifi2cloudList(), pResponsePacket) != 0x01)
 			{
 				EJ_ErrPrintf(("[Process_WifiModuleRebootRequest][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
@@ -946,9 +920,7 @@ uint8_t Process_WifiModuleResetToFactoryRequest(wifi2CloudPacket *pPacket)
 		pResponsePacket->head[1] = 0x5A;
 
 		pResponsePacket->version = 0x04;
-
 		pResponsePacket->crypt = 0x11;
-
 		pResponsePacket->dataType[0] = 0xB2;
 		pResponsePacket->dataType[1] = 0x80;
 
@@ -956,19 +928,14 @@ uint8_t Process_WifiModuleResetToFactoryRequest(wifi2CloudPacket *pPacket)
 
 		/**/
 		fillTimeStampToPackt(pResponsePacket);
-
 		GetWifiStatusDeviceID(pResponsePacket->deviceID);
-
 		PacketWifiModuleResetToFactoryResponse response;
 
 		response.response = 0x00;
-
 		pResponsePacket->data = (uint8_t *)EJ_mem_malloc(sizeof(PacketWifiModuleResetToFactoryResponse));
 
 		if (pResponsePacket->data) {
-
 			memcpy(pResponsePacket->data, (uint8_t *)&response, sizeof(PacketWifiModuleResetToFactoryResponse));
-
 			if (nolock_list_push(GetWifi2cloudList(), pResponsePacket) != 0x01)
 			{
 				EJ_ErrPrintf(("[Process_WifiModuleRebootRequest][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
@@ -1012,17 +979,12 @@ void Process_WifiModuleConfigRequest(wifi2CloudPacket *pPacket)
 		if (pPacket->data) {
 
 			EJ_WifiModuleConfig config;
-
 			config.ssidLength = pPacket->data[23];
-
 			memcpy(config.ssid, pPacket->data + 24, config.ssidLength);
-
 			config.passwordLength = pPacket->data[24 + config.ssidLength];
-
 			memcpy(config.password, pPacket->data + 25 + config.ssidLength, config.passwordLength);
 
-			EJ_Wlan_set_network(&config);
-		
+			EJ_Wlan_set_network(&config);	
 			EJ_Wlan_sta_start();
 
 
@@ -1036,7 +998,6 @@ void Process_WifiModuleConfigRequest(wifi2CloudPacket *pPacket)
 			configResponse.errCode = 0;
 
 			wifi2CloudPacket *pResponsePacket = NULL;
-
 			pResponsePacket = (wifi2CloudPacket *)EJ_mem_malloc(sizeof(wifi2CloudPacket));
 
 			if (pResponsePacket) {
@@ -1045,7 +1006,6 @@ void Process_WifiModuleConfigRequest(wifi2CloudPacket *pPacket)
 				pResponsePacket->head[1] = 0x5A;
 
 				pResponsePacket->version = 0x04;
-
 				pResponsePacket->crypt = 0x11;
 
 				pResponsePacket->dataType[0] = 0x90;
@@ -1542,11 +1502,8 @@ void Process_DeviceFirmwareVersionUpdateRequest(wifi2CloudPacket *pPacket)
 	if (pPacket) {
 		
 		char *httpAddr = NULL;
-		httpAddr = (char *)(pPacket->data + 34);
-		
+		httpAddr = (char *)(pPacket->data + 34);		
 		EJ_Printf("device ota httpAddr: %s\r\n", httpAddr);
-		
-
 		if (pPacket->data) {
 			int readCount = 0;
 
@@ -1556,16 +1513,16 @@ void Process_DeviceFirmwareVersionUpdateRequest(wifi2CloudPacket *pPacket)
 			/* down the url_str image and write the flash addr to temp.*/
 			if(EJ_DeviceFirmwareDownload(httpAddr, NULL))
 			{
-			//cmp bin file md5 8062
-			//wifi2CloudPacket *pRewifi2Cloud = Response(bin2md5);
-			
-			/* make an uart commands to query whether need to update. */
-			uart2WifiPacket* pRequestPacket = (uart2WifiPacket*)queryDeviceUpdate(0x8000, version);
-			
-			/* add this packet to wifi2cloud list.*/
-			if (nolock_list_push(GetWifi2deviceList(), pRequestPacket) != 0x01)
-			{
-				EJ_Printf("[MQTTCommands.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: add packet to wifi2devicelist failed.\r\n");
+				//cmp bin file md5 8062
+				//wifi2CloudPacket *pRewifi2Cloud = Response(bin2md5);
+				
+				/* make an uart commands to query whether need to update. */
+				uart2WifiPacket* pRequestPacket = (uart2WifiPacket*)queryDeviceUpdate(0x8000, version);
+				
+				/* add this packet to wifi2cloud list.*/
+				if (nolock_list_push(GetWifi2deviceList(), pRequestPacket) != 0x01)
+				{
+					EJ_Printf("[MQTTCommands.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: add packet to wifi2devicelist failed.\r\n");
 				}
 			}
 		}
