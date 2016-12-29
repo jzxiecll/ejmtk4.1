@@ -38,7 +38,7 @@ int   EJ_App_network_configured_status(unsigned char *state);
 
 int  EJ_App_psm_erase();
 void  EJ_App_reset();
-int   EJ_Wlan_get_connection_state(int *state);
+int   EJ_Wlan_get_connection_state(unsigned char *state);
 int   EJ_Wlan_set_connection_state(int state);
 int  EJ_Wlan_get_mac_address(uint8_t  *mac);
 int  EJ_Wlan_get_mac_address_posix(uint8_t  *buf);

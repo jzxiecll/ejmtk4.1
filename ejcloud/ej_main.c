@@ -14,7 +14,7 @@ void atTaskTimerCB()
 	uint8_t deviceID[6] = {0};
 	GetWifiStatusDeviceID(deviceID);	
 	int total = deviceID[0] | deviceID[1] | deviceID[2] | deviceID[3] | deviceID[4] | deviceID[5];
-	EJ_Printf("atTaskTimerCB total1=%d\r\n",total);
+	//EJ_Printf("atTaskTimerCB total1=%d\r\n",total);
 	if (total == 0) {
 		EJ_Printf("atTaskTimerCB total2=%d\r\n",total);
 		if (EJ_timer_change(&atTaskTimer, EJ_msec_to_ticks(5000), 0) != EJ_SUCCESS) {
@@ -32,6 +32,16 @@ void atTaskTimerCB()
 			timeSyncCount = 0;		
 		}
 	}
+	unsigned char wlan_state = 1;
+	int ret = EJ_Wlan_get_connection_state(&wlan_state);	
+	if(!ret)
+	{
+		if((wlan_state == ROUTER_CONNECTED)&&(GetWifiModuleStatusCloudServiceStatus() == CLOUD_NOT_CONNECTED))
+		{
+			EJ_PutEventSem(EJ_EVENT_routerConnectedSem);
+		}
+	}
+		
 }
 
 void setupAtTaskTimer()
@@ -41,7 +51,7 @@ void setupAtTaskTimer()
 			    EJ_msec_to_ticks(10000),
 			    &atTaskTimerCB,
 			    NULL,
-			    EJ_TIMER_ONE_SHOT,
+			    EJ_TIMER_PERIODIC,
 			    EJ_TIMER_AUTO_ACTIVATE) != EJ_SUCCESS) {
 		EJ_ErrPrintf(("[mainLoop.c][setupAtTaskTimer][ERROR]: Failed to create atTaskTimer timer.\r\n"));
 	}

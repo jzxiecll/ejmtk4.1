@@ -1,6 +1,7 @@
 #include "ej_port_wlan.h"
 #include "wifi_api.h"
 #include "ej_wificonfig.h"
+#include "WifiModuleStatus.h"
 EJ_DevInfo_t _g_dev;
 
 static  int ej_get_mac_address(uint8_t *mac)
@@ -11,8 +12,8 @@ static  int ej_get_mac_address(uint8_t *mac)
 void EJ_init_dev()
 {
 	char mac[13]; 
-  char buf[6];
-  ej_get_mac_address(buf);
+    char buf[6];
+    ej_get_mac_address(buf);
 
 	sprintf(mac,"%02X%02X%02X%02X%02X%02X", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
 
@@ -74,29 +75,29 @@ void  EJ_App_reset()
 	EJ_App_reboot(0);
 }
 
-
-
-
-
-
-int   EJ_Wlan_get_connection_state(int *state)
+int   EJ_Wlan_get_connection_state(unsigned char *state)
 {
 	if(state == NULL)
 			return -EJ_E_INVAL;
-	int cur = 0 ;
+	unsigned char cur = 5 ;
+	if( wifi_connection_get_link_status(&cur)<0)
+	{
+		return -EJ_FAIL;
+	}
 	
 	switch(cur){
-			case  1:
 
+			case  0://disconnected 
+				*state = ROUTER_NOT_CONNECTED;
+				break;
+			case  1://connected
+				*state = ROUTER_CONNECTED;
+				break;
 			case  2:
-
 			case  3:
-
 			default: 
-
 				*state  = cur ;
-
-			break;
+				break;
 	}
 
 
@@ -136,9 +137,7 @@ int  EJ_Wlan_get_mac_address_posix(uint8_t  *buf)
 	if(buf == NULL)
 		return -EJ_E_INVAL; 
 	{
-		
-			    ej_get_mac_address(buf);
-
+		ej_get_mac_address(buf);
  	}
 	return EJ_SUCCESS;
 
@@ -152,8 +151,6 @@ int    EJ_Wlan_set_mac_address(uint8_t  *mac)
 		return -EJ_E_INVAL; 
 	 {
 	 
-	 
-	 
 	 }
 
 	return EJ_SUCCESS;
@@ -165,10 +162,7 @@ int EJ_Wlan_get_ip_address(uint8_t* sIpaddr)
 	
 {
 	int len = 0 ;
-
-	return nvdm_read_data_item("common", "IpAddr", sIpaddr, &len);
-
-	
+	return nvdm_read_data_item("common", "IpAddr", sIpaddr, &len);	
 }
 
 int  EJ_Wlan_set_ip_address(uint8_t* sIpaddr)
@@ -176,9 +170,7 @@ int  EJ_Wlan_set_ip_address(uint8_t* sIpaddr)
 	if(sIpaddr == NULL)
 		return -EJ_E_INVAL; 
 	{
-	
-	
-	
+		
 	}
 
 	return EJ_SUCCESS;
@@ -192,11 +184,9 @@ int  EJ_Wlan_set_network(EJ_WifiModuleConfig *config)
 {
 
 	wifi_config_set_ssid(WIFI_PORT_STA,config->ssid,config->ssidLength);
-
 	wifi_config_set_wpa_psk_key(WIFI_PORT_STA,config->password,config->passwordLength);
 
 	return 0 ;
-
 }
 
 
@@ -206,10 +196,7 @@ int  EJ_Wlan_get_network()
 {
 
 	int ret = 0 ;
-
 	return ret ;
-
-
 }
 
 
@@ -218,7 +205,6 @@ int EJ_Wlan_sta_start()
 	wifi_set_opmode(0x01);
 	wifi_config_reload_setting();
 	return EJ_SUCCESS; 
-
 }
 
 
@@ -235,9 +221,7 @@ int EJ_Wlan_uap_start(char *ssid,char *passphrase)
 {
 	wifi_config_set_opmode(0x02);
 	wifi_config_reload_setting();
-	return EJ_SUCCESS;
-
-	
+	return EJ_SUCCESS;	
 }
 
 
@@ -245,12 +229,8 @@ int EJ_Wlan_uap_stop()
 {
 	wifi_config_set_opmode(0x01);
 	wifi_profile_set_opmode(0x01);
-	return EJ_SUCCESS;
-
-	
+	return EJ_SUCCESS;	
 }
-
-
 
 
 bool  EJ_Wlan_is_uap_started()
@@ -270,16 +250,11 @@ bool EJ_Wlan_is_sta_connected()
 	uint8_t mode ;
 
 	wifi_config_get_opmode(&mode);
-
 	if(mode==0x01)
 		return true;
 	else	
 		return false;
 }
-
-
-
-
 
 
 int  EJ_Device_get_uuid(uint8_t *pUuid)
