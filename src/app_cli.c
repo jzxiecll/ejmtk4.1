@@ -88,10 +88,11 @@ unsigned char ej_cli_Deviceid()
 
  void ej_cli_set_log_level(int argc, char *argv[])
 {
-  if (argc == 2) {
-    char *pLogLevel = argv[1];
+
+  if (argc == 1) {
+    char *pLogLevel = argv[0];
     int level = atoi(pLogLevel);
-    EJ_DbgLevel = level;
+    EJ_SetPacketDbgLevel(level);
     EJ_AlwaysPrintf(("[INFO]: set log level success!\r\n"));		
   }else {
 	EJ_ErrPrintf(("[ERROR]: set log level error argc!\r\n"));    

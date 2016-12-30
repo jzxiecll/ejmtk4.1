@@ -4,7 +4,7 @@
 #include "ej_porting_layer.h"
 #include "ej_wificonfig.h"
 #include "WifiModuleStatus.h"
-
+#include "ej_packet.h"
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -32,7 +32,7 @@ void ej_cli_wifi_fota_http(int argc, char *argv[]);
 
 #define EJ_CLI_MSA 		{"ms", "<Ejcloud modify server addr>", ej_cli_modify_server},
 #define EJ_CLI_MDA		{"md", "<Ejcloud modify cloud domain addr>", ej_cli_modify_clouddomain_addr},
-#define EJ_CLI_MLL		{"mll", "<Ejcloud modify log level>", ej_cli_set_log_level},
+#define EJ_CLI_MLL		{"mll", "<Ejcloud modify log level: 4--cloud,5--uart and cloud>", ej_cli_set_log_level},
 #define EJ_CLI_SOFTVER  {"version", "<Ejcloud Get Software Version>", ej_cli_get_softwareversion},
 
 #define EJ_CLI_FOTA_HTTP  {"updatefw", "<Ejcloud Wifi fota http url>", ej_cli_wifi_fota_http},
@@ -45,6 +45,8 @@ void ej_cli_wifi_fota_http(int argc, char *argv[]);
 						EJ_CLI_MDA\
 						EJ_CLI_MLL\
 						EJ_CLI_FOTA_HTTP\
+						EJ_CLI_SOFTVER \
+
 
 #ifdef __cplusplus
  }

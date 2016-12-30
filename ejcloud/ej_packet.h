@@ -152,6 +152,7 @@ void Process_CloudGetWifiModuleInfoRequestCB();
 uint8_t InitPacketQUEUE();
 ej_queue_t *GetCloud2deviceQueue();
 ej_queue_t *GetDevice2cloudQueue();
+void  EJ_SetPacketDbgLevel(int level);
 
 
 #endif //_H_WIFIMODULE_PACKET_H_

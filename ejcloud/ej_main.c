@@ -4,7 +4,7 @@ static ej_thread_t mainLoop_thread;
 extern InfoManagement h_InfoManagement;
 extern ej_queue_t *ejEventQueue;
 static ej_thread_stack_define(mainLoop_stack, 2048);
-ej_timer_t atTaskTimer;
+ej_timer_t atTaskTimer=NULL;
 
 void atTaskTimerCB()
 {
@@ -14,7 +14,7 @@ void atTaskTimerCB()
 	uint8_t deviceID[6] = {0};
 	GetWifiStatusDeviceID(deviceID);	
 	int total = deviceID[0] | deviceID[1] | deviceID[2] | deviceID[3] | deviceID[4] | deviceID[5];
-	//EJ_Printf("atTaskTimerCB total1=%d\r\n",total);
+	EJ_Printf("atTaskTimerCB total1=%d\r\n",total);
 	if (total == 0) {
 		EJ_Printf("atTaskTimerCB total2=%d\r\n",total);
 		if (EJ_timer_change(&atTaskTimer, EJ_msec_to_ticks(5000), 0) != EJ_SUCCESS) {
@@ -46,15 +46,21 @@ void atTaskTimerCB()
 
 void setupAtTaskTimer()
 {
-	if (EJ_timer_create(&atTaskTimer,
+	if(!atTaskTimer){
+		if (EJ_timer_create(&atTaskTimer,
 			    "atTaskTimer",
 			    EJ_msec_to_ticks(10000),
 			    &atTaskTimerCB,
 			    NULL,
 			    EJ_TIMER_PERIODIC,
-			    EJ_TIMER_AUTO_ACTIVATE) != EJ_SUCCESS) {
-		EJ_ErrPrintf(("[mainLoop.c][setupAtTaskTimer][ERROR]: Failed to create atTaskTimer timer.\r\n"));
+			    EJ_TIMER_AUTO_ACTIVATE) != EJ_SUCCESS) 
+		{
+				EJ_ErrPrintf(("[mainLoop.c][setupAtTaskTimer][ERROR]: Failed to create atTaskTimer timer.\r\n"));
+		}
+	}else{
+		EJ_timer_activate(atTaskTimer);
 	}
+	
 }
 
 void initMainLoop(uint8_t isHomeAPConfig)
@@ -96,46 +102,42 @@ static void EJ_event_routerConnectedProcess(void* data)
 {		
 	//EJ_InfoPrintf(("[mainloop.c][mainLoop][INFO]:receive an roter connectedSem event.\r\n"));
 			/* */
-			SetWifiModuleStatusRouterStatus(ROUTER_CONNECTED);
-			/* if udpbroadcast module is not running. then run it.*/
-			if (GetWifiModuleStatusIsUdpBroadcastRunning() == UDPBROADCASTMODULE_NOT_RUNNING) {
-					if (EJ_init_udpbroadcast() == INIT_UDPBROADCAST_SUCCESS) {
-						SetWifiModuleStatusIsUdpBroadcastRunning(UDPBROADCASTMODULE_RUNNING);
-					}else{
-						EJ_PutEventSem(EJ_EVENT_routerConnectedSem);
-					}
+	SetWifiModuleStatusRouterStatus(ROUTER_CONNECTED);
+	/* if udpbroadcast module is not running. then run it.*/
+	if (GetWifiModuleStatusIsUdpBroadcastRunning() == UDPBROADCASTMODULE_NOT_RUNNING) {
+			if (EJ_init_udpbroadcast() == INIT_UDPBROADCAST_SUCCESS) {
+				SetWifiModuleStatusIsUdpBroadcastRunning(UDPBROADCASTMODULE_RUNNING);
+			}else{
+				EJ_PutEventSem(EJ_EVENT_routerConnectedSem);
 			}
-	
-			/* if cloud services is not connected. */
-			if (GetWifiModuleStatusCloudServiceStatus() == CLOUD_NOT_CONNECTED) {
-				EJ_Printf("Call EJ_user_init_MQTTThread \r\n");
-				/* if wifimodule is connected to home AP. */	
-				if (EJ_user_init_MQTTThread() == INIT_MQTT_SUCCESS) {
-						EJ_InfoPrintf(("[mainloop.c][mainLoop][INFO]: connect cloud services success.\r\n"));
-						SetWifiModuleStatusCloudServiceStatus(CLOUD_CONNECTED);
-						uint8_t  pArrayMac[12]={0};
-						uint8_t  pArrayuuid[6]={0};
-						EJ_Wlan_get_mac_address(pArrayMac);
-						EJ_Device_get_uuid(pArrayuuid);
-						wifi2CloudPacket * pWifi2CloudPacket = (wifi2CloudPacket *)requestDeviceIDFromCloud(pArrayMac,pArrayuuid);
-						if (!pWifi2CloudPacket) {
-							return;
-						}
-						if (nolock_list_push(GetWifi2cloudList(), pWifi2CloudPacket) != 0x01)
-						{
-							EJ_ErrPrintf(("[MQTTThread.c][Init_MQTTThread][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
-						}
-						setupAtTaskTimer();					
-					}else{
-					
-						EJ_PutEventSem(EJ_EVENT_routerConnectedSem);
-					}	
+	}
 
-			}
+	/* if cloud services is not connected. */
+	if (GetWifiModuleStatusCloudServiceStatus() == CLOUD_NOT_CONNECTED) {
+		EJ_Printf("Call EJ_user_init_MQTTThread \r\n");
+		/* if wifimodule is connected to home AP. */	
+		if (EJ_user_init_MQTTThread() == INIT_MQTT_SUCCESS) {
+				EJ_InfoPrintf(("[mainloop.c][mainLoop][INFO]: connect cloud services success.\r\n"));
+				SetWifiModuleStatusCloudServiceStatus(CLOUD_CONNECTED);
+				uint8_t  pArrayMac[12]={0};
+				uint8_t  pArrayuuid[6]={0};
+				EJ_Wlan_get_mac_address(pArrayMac);
+				EJ_Device_get_uuid(pArrayuuid);
+				wifi2CloudPacket * pWifi2CloudPacket = (wifi2CloudPacket *)requestDeviceIDFromCloud(pArrayMac,pArrayuuid);
+				if (!pWifi2CloudPacket) {
+					return;
+				}
+				if (nolock_list_push(GetWifi2cloudList(), pWifi2CloudPacket) != 0x01)
+				{
+					EJ_ErrPrintf(("[MQTTThread.c][Init_MQTTThread][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+				}
+				setupAtTaskTimer();					
+			}else{
+			
+				EJ_PutEventSem(EJ_EVENT_routerConnectedSem);
+			}	
 
-
-
-
+	}
 	
 }
 static void EJ_event_broadcastRequestProcess(void* data)

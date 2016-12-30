@@ -203,11 +203,19 @@ uint8_t makeCrc(uint8_t *data, uint8_t length)
 }
 
 typedef uint32_t EJ_DebugUartLevel;
-static EJ_DebugUartLevel EJ_PacketDbgLevel = 3;
+static EJ_DebugUartLevel EJ_PacketDbgLevel = 4;
+
+#define LEVEL_WIFI_UART_ON   (3)
+#define LEVEL_WIFI_CLOUD_ON   (4)
+
+void  EJ_SetPacketDbgLevel(int level)
+{
+	EJ_PacketDbgLevel = level;
+}
 
 void EJ_PrintUart2WifiPacket(uart2WifiPacket *pPacket, const char *prefix)
 {
-	if (3 < EJ_DEBUG_INFO) {
+	if (EJ_PacketDbgLevel < EJ_DEBUG_INFO+1) {
 	    return;
 	}
 	if (pPacket) {
@@ -235,7 +243,7 @@ void EJ_PrintUart2WifiPacket(uart2WifiPacket *pPacket, const char *prefix)
 
 void EJ_PrintWifi2CloudPacket(wifi2CloudPacket *pPacket, const char *prefix)
 {
-	if (4 < EJ_DEBUG_INFO) {
+	if (EJ_PacketDbgLevel < EJ_DEBUG_INFO) {
 	    return;
 	}
 	if (pPacket) {
