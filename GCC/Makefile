@@ -111,7 +111,13 @@ endif
 # config
 #
 ##############################################################################
-
+MODULES_3P3V = y
+HARDWARE_TYPE = "WF"
+HARDWARE_BRAND = "MT"
+HARDWARE_MODEL = "01"
+SOFTWARE_PLATFORM  = "EJ"
+SOFTWARE_VERSION_M = "01010001"
+SOFTWARE_TYPE = "00"
 
 RAM_BOOTING     = 0
 
@@ -120,7 +126,8 @@ FLOAT_TYPE      = hard
 BUILD_DIR       = $(PWD)/build
 
 # Project name
-PROJ_NAME       = $(notdir $(abspath $(dir $(PWD))))
+#PROJ_NAME       = $(notdir $(abspath $(dir $(PWD))))
+PROJ_NAME       ="$(HARDWARE_TYPE)_$(HARDWARE_BRAND)_$(HARDWARE_MODEL)_$(SOFTWARE_PLATFORM)_$(SOFTWARE_VERSION_M)_$(SOFTWARE_TYPE)_$(shell date "+%Y%m%d")"
 PROJ_PATH       = $(PWD)
 OUTPATH         = $(PWD)/build
 

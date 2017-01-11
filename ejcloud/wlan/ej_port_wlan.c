@@ -256,9 +256,18 @@ bool EJ_Wlan_is_sta_connected()
 		return false;
 }
 
-
+#define EJ_UUID_LEN 6
 int  EJ_Device_get_uuid(uint8_t *pUuid)
 {
-	memcpy(pUuid,_g_dev.uuid,6);
+	int  uuid_len = EJ_UUID_LEN;
+    int  status;
+    status = EJ_read_psm_item("UUID",(unsigned char *)pUuid,uuid_len);
+
+	if(!status)
+	{
+
+	}else{
+		memcpy(pUuid,_g_dev.uuid,6);
+	}
 	return 0 ;
 }

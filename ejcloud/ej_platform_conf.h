@@ -12,12 +12,15 @@
 
 #define MASTER_SERVER_ADDR	"120.24.170.30"
 
+#define SERVER_ADDR_MASTER	"120.24.170.30"
+#define SERVER_ADDR_TEST	"120.77.76.24"
+
+#define SERVER_TOPIC_MASTER "$USR/manager"
+#define SERVER_TOPIC_TEST   "$USR/manageriotdevice15"
+
 #define MASTER_SERVER_PORT	1883
 
 #define CLOUD_DOMAIN_ADDR   "ej-test.com"
-
-
-
 
 
 /*
@@ -36,9 +39,19 @@
 
 #define SOFTWARE_VERSION_LSB	18
 
-#define PUBLISH_YEAR	16
+#define PUBLISH_YEAR	17
 
-#define PUBLISH_WEEK	16
+#define PUBLISH_WEEK	01
 
+
+
+/*
+**************************************************************
+*
+*MODULE    DEFINE  CODE
+**************************************************************
+*/
+#define  STR_WIFI_MODULE_BRAND  "CCD" 
+#define  STR_WIFI_MODULE_MODE   "MT7687"
 #endif
 

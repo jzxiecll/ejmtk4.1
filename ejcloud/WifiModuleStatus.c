@@ -1056,9 +1056,9 @@ uint8_t Init_InfoManagement()
   SetWifiModuleInfoBrandStr("CCD");
   SetWifiModuleInfoModelStr("MW300");
 #else
-  h_InfoManagement.wifiInfo.model = MODULE_MODEL_CCD_U_MW200;
-  SetWifiModuleInfoBrandStr("CCD");
-  SetWifiModuleInfoModelStr("MC200");
+  h_InfoManagement.wifiInfo.model = MODULE_MODEL_CCD_U_MT7687;
+  SetWifiModuleInfoBrandStr(STR_WIFI_MODULE_BRAND);
+  SetWifiModuleInfoModelStr(STR_WIFI_MODULE_MODE);
 #endif
 
   int ret = 0;

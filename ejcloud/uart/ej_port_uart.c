@@ -50,7 +50,7 @@ static int EJ_port_uart_dma_init( EJ_UART_ID_Type port, uint32_t baud)
 	hal_uart_dma_config_t dma_config;
  	g_ejcloud_uart_port = port;
 
-   hal_uart_deinit(g_ejcloud_uart_port);
+    hal_uart_deinit(g_ejcloud_uart_port);
 
 	if(port == HAL_UART_0 ){
 			hal_gpio_init(HAL_GPIO_2);
@@ -102,8 +102,7 @@ static int EJ_port_uart_dma_init( EJ_UART_ID_Type port, uint32_t baud)
 
 static int EJ_port_uart_poll_init(EJ_UART_ID_Type port_id, uint32_t baud)
 {
-	/*Need to do */
-	
+	/*Need to do */	
 	return 0;
 }
 
@@ -112,7 +111,7 @@ static int EJ_port_uart_poll_init(EJ_UART_ID_Type port_id, uint32_t baud)
 static int EJ_port_uart_dma_send(uint8_t *buf, int len)
 {
 		/*Need to do */
-	  uint32_t avail_space, left_size, real_byte, sent_byte;
+	uint32_t avail_space, left_size, real_byte, sent_byte;
     char *pbuf;
 
     pbuf = buf;
@@ -144,13 +143,13 @@ static int EJ_port_uart_poll_send(uint8_t *buf, int len)
 {
 
 	return 0;
-		/*Need to do */
+	/*Need to do */
    
 }
 
 static int EJ_port_uart_dma_receive(uint8_t *buf, int len)
 {
-	 uint32_t left_size, avail_bytes, rcv_bytes;
+	uint32_t left_size, avail_bytes, rcv_bytes;
     char *pbuf;
 
     pbuf = buf;
@@ -181,8 +180,7 @@ static int EJ_port_uart_poll_receive(uint8_t *buf, int len)
 }
 static int EJ_port_uart_close()
 {
-	/*Need to do */
-	
+	/*Need to do */	
 	return hal_uart_deinit(g_ejcloud_uart_port);
 }
 
@@ -206,8 +204,7 @@ static int EJ_port_uart_close()
  *
  */
  bool EJ_uart_write( uint8_t *buf, uint32_t len)
-{
-	  	
+{	  	
 #if EJ_UART_DMA
 	  return EJ_port_uart_dma_send(buf,  len);
 #else
@@ -222,10 +219,8 @@ static int EJ_port_uart_close()
 static int EJ_port_uart_open(EJ_UART_ID_Type port_id, uint32_t baud)
 {
 #if EJ_UART_DMA
-
 	return EJ_port_uart_dma_init(port_id,baud);
 #else
-
 	return EJ_port_uart_poll_init(port_id,baud);
 #endif	
 }
@@ -241,7 +236,6 @@ int EJ_uart_open(EJ_UART_ID_Type port_id, uint32_t baud)
 	}else
 	{
 		EJ_DebugPrintf(("[EJ_uart_open] uart_open success!\r\n"));
-
 		return 0;
 	}
 
@@ -254,10 +248,7 @@ int EJ_uart_open(EJ_UART_ID_Type port_id, uint32_t baud)
 */
 int EJ_uart_close(EJ_UART_ID_Type uartX)
 {
-
-
 	EJ_port_uart_close();
-
 	return 0;
 }
 
@@ -265,10 +256,8 @@ int EJ_uart_close(EJ_UART_ID_Type uartX)
  int ejcloud_port_uart_open(uint8_t port)
 {
 #if 1
-
 	return EJ_port_uart_dma_init(port,9600);
 #else
-
 	return ejcloud_port_uart_poll_init(port);
 #endif	
 }

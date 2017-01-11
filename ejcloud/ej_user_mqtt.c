@@ -5,6 +5,8 @@
 #include "ej_port_wlan.h"
 #include "ej_event_manager.h"
 #include "ej_utils.h"
+#include "ej_platform_conf.h"
+
 
 static ej_thread_t MQTTSendThread_thread = 0;
 static ej_thread_stack_define(MQTTSendThread_stack, 2048);
@@ -482,13 +484,16 @@ opts_struct * GenerateMQTTConnectionerOpts()
 
 #else
 
-	opt->host = "120.24.170.30";
+//	opt->host = "120.24.170.30";   
+
+	opt->host = SERVER_ADDR_TEST; //test
 #endif
 	opt->port = 1883;
 	opt->showtopics = 1;
 	opt->topic = "#";
 	opt->retained = 1;
-	opt->pubTopic = "$USR/manager";
+	opt->pubTopic = SERVER_TOPIC_TEST;
+	//opt->pubTopic = "$USR/manager";
 	opt->subTopic = (char *)EJ_mem_malloc(11 + 1);
 
 	if(!opt->subTopic){
