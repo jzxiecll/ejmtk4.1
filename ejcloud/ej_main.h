@@ -13,6 +13,7 @@
 #include "ej_port_wlan.h"
 #include "ej_utils.h"
 #include "ej_aes.h"
+#include "ej_user_lanserver.h"
 
 
 typedef enum {

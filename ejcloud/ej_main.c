@@ -148,11 +148,11 @@ static void EJ_event_broadcastRequestProcess(void* data)
 	*/
 	// if lan module is not running, then run it. 
 	if (GetWifiModuleStatusIsLanModuleRunning() == LANMODULE_NOT_RUNNING) {
-#if 0
+
 		if (init_LANServer() == INIT_LANSERVER_SUCCESS) {
 			SetWifiModuleStatusIsLanModuleRunning(LANMODULE_RUNNING);
 		}
-#endif
+
 	}
 
 	// send an response broadcast packet.
@@ -169,15 +169,13 @@ static void EJ_event_uapStartedProcess(void* data)
 	/* if lan module is not running, then run it. */
 	if (GetWifiModuleStatusIsLanModuleRunning() == LANMODULE_NOT_RUNNING) {
 
-#if 0
+
 		if (init_LANServer() == INIT_LANSERVER_SUCCESS) {
 
 			SetWifiModuleStatusIsLanModuleRunning(LANMODULE_RUNNING);
 
-		}else {
+		}
 
-		}	
-#endif
 	}	
 
 
@@ -429,7 +427,26 @@ static void EJ_Packet_Process(void* data)
 		Process_Wifi2AppPacket(wifi2AppPacket);
 		EJ_mem_free(wifi2AppPacket->data);
 		EJ_mem_free(wifi2AppPacket);	
-	}													
+	}	
+
+
+	//step 4.Process Lan2WifiPacket
+	wifi2CloudPacket *pLan2WifiPacket = NULL;
+	nolock_list_pop(GetLan2wifiList(), (void **)&pLan2WifiPacket);
+
+	if (pLan2WifiPacket) {
+		//AJ_InfoPrintf(("[mainLoop.c][mainLoop][INFO]: receive an Lan2wifiPacket packet.\r\n"));
+
+		uint32_t commandID = (uint32_t)(pLan2WifiPacket->dataType[1] << 8 | pLan2WifiPacket->dataType[0]);
+		
+		MQTTPacketProcessCB cb = getCallbackByMQTTCommandID(commandID);
+
+		if (cb != NULL) {
+			cb(pLan2WifiPacket);
+		}
+		EJ_PacketCloudFree(pLan2WifiPacket);
+	}
+
 
 }
 

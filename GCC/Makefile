@@ -221,6 +221,7 @@ APP_FILES      += $(APP_PATH)/ejcloud/ej_wificonfig.c
 APP_FILES      += $(APP_PATH)/ejcloud/nolock-list.c
 APP_FILES      += $(APP_PATH)/ejcloud/WifiModuleStatus.c
 APP_FILES      += $(APP_PATH)/ejcloud/joycfg.c
+APP_FILES      += $(APP_PATH)/ejcloud/ej_user_lanserver.c
 
 ifeq ($(MTK_MINICLI_ENABLE),y)
 APP_FILES      += $(APP_PATH_SRC)/cli_def.c
