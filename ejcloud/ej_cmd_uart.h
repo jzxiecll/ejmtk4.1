@@ -10,6 +10,7 @@
 uart2WifiPacket * getDeviceInfo();
 uart2WifiPacket * queryDeviceVersion();
 uart2WifiPacket * queryDeviceUpdate(int size, char *softwareVersion);
+uart2WifiPacket * getDeviceUpdateFramePacket(uint32_t frameNum, uint32_t frameNo,uint8_t *sendbuf);
 
 void initUARTCommands();
 

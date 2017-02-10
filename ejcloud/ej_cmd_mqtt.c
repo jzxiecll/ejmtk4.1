@@ -84,7 +84,7 @@ uint8_t Process_RequestDeviceIDFromCloudResponseCB(wifi2CloudPacket *pPacket)
 
 				}else {
 
-				EJ_ErrPrintf(("[MQTTCommands.c][Process_RequestDeviceIDFromCloudResponseCB][ERROR]: request deviceID failed.\r\n"));
+				EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_RequestDeviceIDFromCloudResponseCB][ERROR]: request deviceID failed.\r\n"));
 
 
 			}
@@ -434,8 +434,14 @@ wifi2CloudPacket *reportWifiUpgradeInfoToCloud()
 			pPacket->dataLen[0] = (uint8_t)((datalen & 0x000000ff) >> 0);
 
 			pPacket->data = 0x00;
-
 			memset(pPacket->signature, 0xA5, 16);
+			if (nolock_list_push(GetWifi2cloudList(), pPacket) != 0x01)
+			{
+				EJ_mem_free(pPacket->data);
+				EJ_mem_free(pPacket);
+				EJ_ErrPrintf(("[ej_cmd_mqtt.c][reportWifiUpgradeInfoToCloud][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+			}
+				
 		}
 	}
 
@@ -835,8 +841,8 @@ uint8_t Process_ModifyCloudServiceAddrRequest(wifi2CloudPacket *pPacket)
 			EJ_Printf("needModifyCloudServiceAddr: %d\r\n", request.needModifyCloudServiceAddr);
 			return 0;
 		}else {
-			return 1;
 			EJ_Printf("[Process_ModifyCloudServiceAddrRequest][ERROR]: data or dataLen error.\r\n");
+			return 1;
 		}
 	}
 
@@ -1218,7 +1224,7 @@ void WifiModuleUdpBroadcastRequest(int udpBroadcastType,wifi2AppPacket *pPacket)
 
 			}else{
 					EJ_mem_free(pResponsePacket);
-					EJ_ErrPrintf(("[MQTTCommands.c][Process_WifiModuleDiscoverRequest][ERROR]: EJ_mem_malloc responseData failed.\r\n"));
+					EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_WifiModuleDiscoverRequest][ERROR]: EJ_mem_malloc responseData failed.\r\n"));
 					return ;
 			}
 			// 加入发送 队列
@@ -1227,7 +1233,7 @@ void WifiModuleUdpBroadcastRequest(int udpBroadcastType,wifi2AppPacket *pPacket)
 			{
 				EJ_mem_free(pResponsePacket->data);
 				EJ_mem_free(pResponsePacket);
-				EJ_ErrPrintf(("[MQTTCommands.c][Process_WifiModuleDiscoverRequest][ERROR]: add packet to wifi2udplist failed.\r\n"));
+				EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_WifiModuleDiscoverRequest][ERROR]: add packet to wifi2udplist failed.\r\n"));
 			}else{
 
 				EJ_Printf("push a Wifi2udp message!\r\n");
@@ -1424,7 +1430,7 @@ uint8_t Process_QueryDeviceFirmwareVersionRequest(wifi2CloudPacket *pPacket)
 			uint8_t * version = GetDeviceInfoDeviceTVersionString();
 
 			if (version == NULL) {
-				EJ_ErrPrintf(("[MQTTCommands.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: version is empty."));
+				EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: version is empty."));
 				
 			}
 
@@ -1447,11 +1453,11 @@ uint8_t Process_QueryDeviceFirmwareVersionRequest(wifi2CloudPacket *pPacket)
 			/* add this packet to wifi2cloud list.*/
 			if (nolock_list_push(GetWifi2cloudList(), pResponsePacket) != 0x01)
 			{
-				EJ_ErrPrintf(("[MQTTCommands.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+				EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 			}
 		}else {
 
-			EJ_ErrPrintf(("[MQTTCommands.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]:EJ_mem_malloc failed.\r\n"));
+			EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]:EJ_mem_malloc failed.\r\n"));
 		}
 
 	}
@@ -1477,7 +1483,7 @@ uint8_t Process_QueryDeviceFirmwareVersionRequest(wifi2CloudPacket *pPacket)
 
 				if (nolock_list_push(GetWifi2deviceList(), pUart2WifiPacket) != 0x01)
 				{
-					EJ_ErrPrintf(("[MQTTCommands.c][Process_WifiModuleDiscoverRequest][ERROR]: add packet to wifi2udplist failed.\r\n"));
+					EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_WifiModuleDiscoverRequest][ERROR]: add packet to wifi2udplist failed.\r\n"));
 					EJ_PacketUartFree(pUart2WifiPacket);
 					pUart2WifiPacket = NULL;
 				}
@@ -1497,13 +1503,62 @@ uint8_t Process_QueryDeviceFirmwareVersionRequest(wifi2CloudPacket *pPacket)
 
 #endif
 
+wifi2CloudPacket *ReportDeviceUpgradeInfoCloud(uint8_t data)
+{
+	wifi2CloudPacket *pPacket = NULL;
+
+	pPacket = (wifi2CloudPacket *)EJ_mem_malloc(sizeof(wifi2CloudPacket));
+	pPacket->data = (uint8_t *)EJ_mem_malloc(4);
+
+	if(pPacket)
+	{
+		pPacket->head[0] = 0x5A;
+		pPacket->head[1] = 0x5A;
+
+		pPacket->version = 0x04;
+		pPacket->crypt = 0x11;
+
+		pPacket->dataType[0] = 0x63;
+		pPacket->dataType[1] = 0x80;
+
+		//fillDataIDToPacket(pPacket, dataID);
+		fillDataIDToPacket(pPacket, 0x55);
+		fillTimeStampToPackt(pPacket);
+		GetWifiStatusDeviceID(pPacket->deviceID);
+
+		int datalen = 45;
+		pPacket->dataLen[3] = (uint8_t)((datalen & 0xff000000) >> 24);
+		pPacket->dataLen[2] = (uint8_t)((datalen & 0x00ff0000) >> 16);
+		pPacket->dataLen[1] = (uint8_t)((datalen & 0x0000ff00) >> 8);
+		pPacket->dataLen[0] = (uint8_t)((datalen & 0x000000ff) >> 0);
+
+		pPacket->data[0] = data;
+		memset(pPacket->signature, 0xA5, 16);
+	}
+
+	return pPacket;
+}
+
+
+static int upgrade_crc_check(unsigned int sumlength)
+{
+	return 1;
+
+}
+
+#define Data2 2
+
 void Process_DeviceFirmwareVersionUpdateRequest(wifi2CloudPacket *pPacket)
 {
 	if (pPacket) {
 		
 		char *httpAddr = NULL;
-		httpAddr = (char *)(pPacket->data + 34);		
+		httpAddr = (char *)(pPacket->data + 35);		
 		EJ_Printf("device ota httpAddr: %s\r\n", httpAddr);
+
+		uint32_t size = (uint32_t)(pPacket->data[15] | pPacket->data[16] << 8 | pPacket->data[17] << 16 | pPacket->data[18] << 24);	
+		EJ_Printf("size :[%X]\r\n",size);
+		
 		if (pPacket->data) {
 			int readCount = 0;
 
@@ -1511,20 +1566,33 @@ void Process_DeviceFirmwareVersionUpdateRequest(wifi2CloudPacket *pPacket)
 			version = (char *)(pPacket->data + 2);
 			
 			/* down the url_str image and write the flash addr to temp.*/
-			if(EJ_DeviceFirmwareDownload(httpAddr, NULL))
+			if(!EJ_device_firmware_download(httpAddr, size))
 			{
-				//cmp bin file md5 8062
-				//wifi2CloudPacket *pRewifi2Cloud = Response(bin2md5);
 				
-				/* make an uart commands to query whether need to update. */
-				uart2WifiPacket* pRequestPacket = (uart2WifiPacket*)queryDeviceUpdate(0x8000, version);
-				
-				/* add this packet to wifi2cloud list.*/
-				if (nolock_list_push(GetWifi2deviceList(), pRequestPacket) != 0x01)
+				//Compare bin file CRC
+				if(upgrade_crc_check(size))
 				{
-					EJ_Printf("[MQTTCommands.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: add packet to wifi2devicelist failed.\r\n");
+					//EJ_Printf("size :[7777777777777777777777777]\r\n");
+					/* make an uart commands to query whether need to update. */
+					uart2WifiPacket * pRequestPacket = queryDeviceUpdate((size - 4), version);
+					EJ_PrintUart2WifiPacket(pRequestPacket,"queryDeviceUpdate 0x62 :wifi2UartPacket");
+					/* add this packet to wifi2cloud list.*/
+					if (nolock_list_push(GetWifi2deviceList(), pRequestPacket) != 0x01)
+					{
+						EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: add packet to wifi2devicelist failed.\r\n"));
+					}
+				}else{
+				
+					wifi2CloudPacket *pReportDeviceUpgradeInfo = ReportDeviceUpgradeInfoCloud(Data2);
+					EJ_PrintWifi2CloudPacket(pReportDeviceUpgradeInfo,"0x62:wifi2CloudPacket:0x8063");
+					
+					if (nolock_list_push(GetWifi2cloudList(), pReportDeviceUpgradeInfo) != 0x01)
+					{
+						EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+					}	
 				}
 			}
+			
 		}
 	}
 }
@@ -1542,7 +1610,6 @@ wifi2CloudPacket * responseHeartBeatToClient(int dataID)
 		pPacket->head[1] = 0x5A;
 
 		pPacket->version = 0x04;
-
 		pPacket->crypt = 0x11;
 
 		pPacket->dataType[0] = 0x7B;
@@ -1557,14 +1624,12 @@ wifi2CloudPacket * responseHeartBeatToClient(int dataID)
 		GetWifiStatusDeviceID(pPacket->deviceID);
 
 		int datalen = 44;
-
 		pPacket->dataLen[3] = (uint8_t)((datalen & 0xff000000) >> 24);
 		pPacket->dataLen[2] = (uint8_t)((datalen & 0x00ff0000) >> 16);
 		pPacket->dataLen[1] = (uint8_t)((datalen & 0x0000ff00) >> 8);
 		pPacket->dataLen[0] = (uint8_t)((datalen & 0x000000ff) >> 0);
 
 		pPacket->data = NULL;
-
 		memset(pPacket->signature, 0xA5, 16);
 	}
 
@@ -1586,7 +1651,7 @@ void Process_heartBeatRequest(wifi2CloudPacket *pPacket)
 			if (nolock_list_push(GetWifi2lanList(), pResponsePacket) != 0x01)
 			{
 		
-				EJ_ErrPrintf(("[MQTTCommands.c][Process_heartBeatRequest][ERROR]: add packet to wifi2lanlist failed.\r\n"));
+				EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_heartBeatRequest][ERROR]: add packet to wifi2lanlist failed.\r\n"));
 			}
 		}
 		

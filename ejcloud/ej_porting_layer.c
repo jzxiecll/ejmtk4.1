@@ -176,6 +176,29 @@ int EJ_timer_activate(ej_timer_t *timer_t)
 	return ret == ejPASS ? EJ_SUCCESS : -EJ_FAIL;
 }
 
+int EJ_timer_reset(ej_timer_t *timer_t)
+{
+	int ret;
+	portBASE_TYPE xHigherPriorityTaskWoken = ejFALSE;
+
+	if (!timer_t || !(*timer_t))
+		return -EJ_E_INVAL;
+	/* Note:
+	 * XTimerStop, seconds argument is xBlockTime which means, the time,
+	 * in ticks, that the calling task should be held in the Blocked
+	 * state, until timer command succeeds.
+	 * We are giving as 0, to be consistent with threadx logic.
+	 */
+	if (is_isr_context()) {
+		/* This call is from Cortex-M3 handler mode, i.e. exception
+		 * context, hence use FromISR FreeRTOS APIs.
+		 */
+		ret = xTimerResetFromISR(*timer_t, &xHigherPriorityTaskWoken);
+		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+	} else
+		ret = xTimerReset(*timer_t, 0);
+	return ret == ejPASS ? EJ_SUCCESS : -EJ_FAIL;
+}
 
 
 int EJ_timer_create(ej_timer_t *timer_t, const char *name, ej_timer_tick ticks,

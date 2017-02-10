@@ -263,7 +263,7 @@ uart2WifiPacket * readDeviceUUID()
 
 }
 
-uint8_t Process_readDeviceSNResponseCB(uart2WifiPacket *pPacket)
+uint8_t Process_ReadDeviceSNResponseCB(uart2WifiPacket *pPacket)
 {
   uint8_t ret = 0x00;
 
@@ -790,10 +790,18 @@ uart2WifiPacket * queryDeviceVersion()
 }
 
 
-uint8_t Process_queryDeviceVersionResponseCB(uart2WifiPacket *pPacket)
+uint8_t Process_QueryDeviceVersionResponseCB(uart2WifiPacket *pPacket)
 {
 
-	//EJ_Printf("[ENTER :%s]\r\n",__FUNCTION__);
+	//EJ_Printf("[ENTER :%s]\r\n",__FUNCTION__);	
+	uint8_t  pota_flg = 0;
+	int rv = EJ_read_psm_item("ota_flg",&pota_flg,1);
+	if(rv != EJ_SUCCESS)
+	{
+		EJ_write_psm_item("ota_flg",&pota_flg);
+	}
+	//EJ_Printf("pota_flg:0x61  :[%d]\r\n",pota_flg);
+	
 	wifi2CloudPacket *pCloud2DevicePacket = NULL;
 	pCloud2DevicePacket = (wifi2CloudPacket *)EJ_mem_malloc(sizeof(wifi2CloudPacket));
 
@@ -803,17 +811,14 @@ uint8_t Process_queryDeviceVersionResponseCB(uart2WifiPacket *pPacket)
 		pCloud2DevicePacket->head[1] = 0x5A;
 
 		pCloud2DevicePacket->version = 0x04;
-
 		pCloud2DevicePacket->crypt = 0x11;
 
 		pCloud2DevicePacket->dataType[0] = 0x61;
 		pCloud2DevicePacket->dataType[1] = 0x80;
 
 		fillDataIDToPacket(pCloud2DevicePacket, (uint8_t)pCloud2DevicePacket->dataID);
-
 		/**/
 		fillTimeStampToPackt(pCloud2DevicePacket);
-
 		/*fill device ID, because this field is produce by cloud, so this place should fill zero.*/
 		GetWifiStatusDeviceID(pCloud2DevicePacket->deviceID);
 
@@ -827,7 +832,6 @@ uint8_t Process_queryDeviceVersionResponseCB(uart2WifiPacket *pPacket)
 		if (pPacket->data) {
 
 			pCloud2DevicePacket->data=(uint8_t *)EJ_mem_malloc(pPacket->dataLen[0]-UART2WIFIPACKET_FIXED_LENGTH);
-
 			if(pCloud2DevicePacket->data)
 			{
 				//EJ_Printf("device->wifi->cloud:0x61:[0002]\r\n");
@@ -839,18 +843,37 @@ uint8_t Process_queryDeviceVersionResponseCB(uart2WifiPacket *pPacket)
 				{
 					EJ_mem_free(pCloud2DevicePacket->data);
 					EJ_mem_free(pCloud2DevicePacket);
-					EJ_ErrPrintf(("[MQTTCommands.c][Process_heartBeatRequest][ERROR]: add packet to Device2wifiList failed.\r\n"));
+					EJ_ErrPrintf(("[ej_cmd_uart.c][Process_QueryDeviceVersionResponseCB][ERROR]: add packet to Device2wifiList failed.\r\n"));
 				}
 
 	      		//SetDeviceInfoDeviceTVersionString(version);
 			}
+
+			EJ_Printf("pota_flg:[%d] pPacket->data[0] :[%d]\r\n",pota_flg,pPacket->data[0]);
+			wifi2CloudPacket *pReportWifiModuleInfo=NULL;
+			//device ota sucessful date report!
+			if(pota_flg && (pPacket->data[0] == 0x00 || pPacket->data[0] == 0x02))
+			{
+				pReportWifiModuleInfo = ReportDeviceUpgradeInfoCloud(0x00);
+				
+			}else if(pota_flg && pPacket->data[0] == 0x01)
+			{
+				pReportWifiModuleInfo = ReportDeviceUpgradeInfoCloud(0x02);
+			}
+			//EJ_PrintWifi2CloudPacket(pReportWifiModuleInfo,"0wifi2CloudPacket:0x8063");	
+			if(pReportWifiModuleInfo!=NULL)
+			{
+				if (nolock_list_push(GetWifi2cloudList(), pReportWifiModuleInfo) != 0x01)
+				{
+					EJ_ErrPrintf(("[ej_cmd_uart.c][Process_QueryDeviceVersionResponseCB][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+				}
+				uint8_t ota_flag = 0;
+				EJ_write_psm_item("ota_flg",&ota_flag);
+			}
 			
     	}else {
-
-
 			EJ_mem_free(pCloud2DevicePacket);
-
-      		EJ_ErrPrintf(("[UARTCommands.c][Process_queryDeviceVersionResponseCB][ERROR]: device version is empty.\r\n"));
+      		EJ_ErrPrintf(("[ej_cmd_uart.c][Process_QueryDeviceVersionResponseCB][ERROR]: device version is empty.\r\n"));
 		}
 		
   	}
@@ -859,31 +882,35 @@ uint8_t Process_queryDeviceVersionResponseCB(uart2WifiPacket *pPacket)
 }
 
 
-uint8_t Process_judgeDeviceOTAResponseCB(uart2WifiPacket *pPacket)
+uint8_t Process_JudgeDeviceOTAResponseCB(uart2WifiPacket *pPacket)
 {
 	uart2WifiPacket *pUart2WifiPacket = NULL;
-
-	EJ_PrintUart2WifiPacket(pPacket,"judgeDeviceOTA");
-
+	EJ_PrintUart2WifiPacket(pPacket,"JudgeDeviceOTA:0x62");
 	if(pPacket)
 	{	
-
 		if(pPacket->data)
 		{	
 			uint8_t framesize = 0;
 			framesize = pPacket->data[1];
-			EJ_Printf("framesize [%d]\r\n",framesize);
-			
-			if(pPacket->data[0] == 0x00){
+			EJ_Printf("framesize [%d]\r\n",framesize);		
+			if(pPacket->data[0] == 0x00)
+			{				
+				uint8_t  ota_flg = 1;
+				EJ_write_psm_item("ota_flg",&ota_flg);
 
-				//EJ_Printf("DeviceFirmwareUpdate\r\n");
-				//DeviceFirmwareUpdate(framesize);
-				//DeviceFirmwareUpdate();
+				wifi2CloudPacket *pReportDeviceUpgradeInfo = ReportDeviceUpgradeInfoCloud(0x01);
+				EJ_PrintUart2WifiPacket(pReportDeviceUpgradeInfo,"1wifi2CloudPacket:0x8063");
+				
+				if (nolock_list_push(GetWifi2cloudList(), pReportDeviceUpgradeInfo) != 0x01)
+				{
+					EJ_ErrPrintf(("[ej_cmd_uart.c][QueryDeviceUpdate][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+				}
+				
+				EJ_device_fota_task(framesize);
 			}
 		}else{
-		  EJ_mem_free(pPacket->data);
-				
-		  EJ_ErrPrintf(("[UARTCommands.c][queryDeviceUpdate][ERROR]: EJ_mem_malloc packet->data failed.\r\n"));
+		  EJ_mem_free(pPacket->data);			
+		  EJ_ErrPrintf(("[ej_cmd_uart.c][QueryDeviceUpdate][ERROR]: EJ_mem_malloc packet->data failed.\r\n"));
 		}
 	}else{
 		EJ_mem_free(pPacket);
@@ -893,24 +920,26 @@ uint8_t Process_judgeDeviceOTAResponseCB(uart2WifiPacket *pPacket)
 }
 
 
-uint8_t Process_ActiveDeviceOtaResponseCB(uart2WifiPacket *pPacket)
+uint8_t Process_ActiveDeviceOTAResponseCB(uart2WifiPacket *pPacket)
 {
 
-	EJ_PrintUart2WifiPacket(pPacket,"ActiveDeviceOta");
+	EJ_PrintUart2WifiPacket(pPacket,"ActiveDeviceOta:0x65");
 
 	if(pPacket)
 	{
 		if(pPacket->data)
 		{
+			uint8_t framesize = 0;
+			framesize = pPacket->data[2];
+			EJ_Printf("ActiveDeviceOta:0x65 framesize = [%d]\r\n",framesize);
 			if(pPacket->data[1] == 0x01)
 			{
 				//获取最新的下载地址并下载(0x62)
 				//char *httpAddr = NULL;
 				//DeviceFirmwareDownload(httpAddr,NULL);
-				//os_thread_sleep(200);
-				
+				//os_thread_sleep(200);				
 				//发送固件给家电板(0x63)
-				//DeviceFirmwareUpdate();
+				EJ_device_fota_task(framesize);
 				
 			}else if(pPacket->data[0] == 0x02)
 			{
@@ -1002,17 +1031,17 @@ uart2WifiPacket* queryDeviceUpdate(int size, char *softwareVersion)
 			
     }else {
 
-      EJ_mem_free(pPacket);
+    	  EJ_mem_free(pPacket);
 
 		  pPacket = NULL;
 				
-		  EJ_ErrPrintf(("[UARTCommands.c][queryDeviceUpdate][ERROR]: EJ_mem_malloc packet->data failed.\r\n"));
+		  EJ_ErrPrintf(("[ej_cmd_uart.c][queryDeviceUpdate][ERROR]: EJ_mem_malloc packet->data failed.\r\n"));
 	}
 		
 		
   }else {
 
-    	EJ_ErrPrintf(("[UARTCommands.c][queryDeviceUpdate][ERROR]: EJ_mem_malloc packet failed.\r\n"));
+    	EJ_ErrPrintf(("[ej_cmd_uart.c][queryDeviceUpdate][ERROR]: EJ_mem_malloc packet failed.\r\n"));
   }
 
   return pPacket;
@@ -1050,11 +1079,11 @@ uart2WifiPacket * pushDeviceUpdate(uint32_t frameNum, uint32_t frameNo,uint8_t *
 
 	      pPacket = NULL;
 				
-	      EJ_ErrPrintf(("[UARTCommands.c][pushDeviceUpdate][ERROR]: EJ_mem_malloc packet->data failed.\r\n"));
+	      EJ_ErrPrintf(("[ej_cmd_uart.c][pushDeviceUpdate][ERROR]: EJ_mem_malloc packet->data failed.\r\n"));
 	    }
   	}else {
   	
-    	EJ_ErrPrintf(("[UARTCommands.c][pushDeviceUpdate][ERROR]: EJ_mem_malloc packet failed.\r\n"));
+    	EJ_ErrPrintf(("[ej_cmd_uart.c][pushDeviceUpdate][ERROR]: EJ_mem_malloc packet failed.\r\n"));
   	}
 
   return pPacket;
@@ -1111,7 +1140,7 @@ uint8_t Process_QueryDeviceUpdateResponseCB(uart2WifiPacket *pPacket)
 
 	    if (ret != EJ_SUCCESS) {
 
-	      EJ_ErrPrintf(("[UARTCommands.c][Process_QueryDeviceUpdateResponseCB][ERROR]: flash_drv_read failed.\r\n"));
+	      EJ_ErrPrintf(("[ej_cmd_uart.c][Process_QueryDeviceUpdateResponseCB][ERROR]: flash_drv_read failed.\r\n"));
 	    }
 
 	    pPacket->data[0] = 0;
@@ -1175,7 +1204,7 @@ uint8_t Process_DeviceUpdateFrameResponse(uart2WifiPacket *pPacket)
 
 	  if (ret != EJ_SUCCESS) {
 
-	    EJ_ErrPrintf(("[UARTCommands.c][Process_DeviceUpdateFrameResponse][ERROR]: flash_drv_read failed.\r\n"));
+	    EJ_ErrPrintf(("[ej_cmd_uart.c][Process_DeviceUpdateFrameResponse][ERROR]: flash_drv_read failed.\r\n"));
 	  }
 
 	  pPacket->data[0] = 0;
@@ -1189,6 +1218,55 @@ uint8_t Process_DeviceUpdateFrameResponse(uart2WifiPacket *pPacket)
 	
   return 0x00;
 }
+
+
+#define  EJ_OTA_DEVICE_FRAME_CONTENT_SIZE   64
+#define  EJ_OTA_DEVICE_FRAME_PERFIX_SIZE    9
+uart2WifiPacket * getDeviceUpdateFramePacket(uint32_t frameNum, uint32_t frameNo,uint8_t *sendbuf)
+{
+  	uart2WifiPacket *pPacket = (uart2WifiPacket *)EJ_mem_malloc(sizeof(uart2WifiPacket));
+
+  	if(pPacket){
+
+	    FillCommonUart2WifiPacket(pPacket, UART2WIFICOMMANDS_PUSH_DEVICE_UPDATE_REQUEST, \
+			UART2WIFIPACKET_FIXED_LENGTH + \
+			EJ_OTA_DEVICE_FRAME_PERFIX_SIZE + \
+			EJ_OTA_DEVICE_FRAME_CONTENT_SIZE, \
+			DATA_WITH_NO_CRYPT | 0);
+		
+	   	pPacket->data = (unsigned char *)EJ_mem_malloc(EJ_OTA_DEVICE_FRAME_PERFIX_SIZE+ \
+			EJ_OTA_DEVICE_FRAME_CONTENT_SIZE );
+
+	    if (pPacket->data) {
+
+	      pPacket->data[0] = 0x00;
+
+		  pPacket->data[4] = (frameNum & 0xff000000)>>24;
+		  pPacket->data[3] = (frameNum & 0x00ff0000)>>16;
+		  pPacket->data[2] = (frameNum & 0x0000ff00)>>8;
+		  pPacket->data[1] = (frameNum & 0x000000ff)>>0;
+		  
+		  pPacket->data[8] = (frameNo & 0xff000000)>>24;
+		  pPacket->data[7] = (frameNo & 0x00ff0000)>>16;
+		  pPacket->data[6] = (frameNo & 0x0000ff00)>>8;
+		  pPacket->data[5] = (frameNo & 0x000000ff)>>0;
+		  //memcpy(pPacket->data + 9,sendbuf,sizeof(sendbuf));
+		  memcpy(pPacket->data + EJ_OTA_DEVICE_FRAME_PERFIX_SIZE,sendbuf,EJ_OTA_DEVICE_FRAME_CONTENT_SIZE);
+				
+	    }else {
+
+	      EJ_mem_free(pPacket);
+	      pPacket = NULL;				
+	      EJ_ErrPrintf(("[ej_cmd_uart.c][pushDeviceUpdate][ERROR]: EJ_mem_alloc packet->data failed.\r\n"));
+	    }
+  	}else {
+  	
+    	EJ_ErrPrintf(("[ej_cmd_uart.c][pushDeviceUpdate][ERROR]: EJ_mem_alloc packet failed.\r\n"));
+  	}
+
+  return pPacket;
+}
+
 
 typedef struct {
 
@@ -1224,17 +1302,17 @@ uart2WifiPacket * settingUartBaud(uint8_t baud)
       memcpy(pPacket->data, (uint8_t *)&settingUartBaudResponse, sizeof(PacketSettingUartBaudResponse));
 
       if (nolock_list_push(GetWifi2deviceList(), pPacket) != 0x01)
-	{
-	  EJ_ErrPrintf(("[UARTCommands.c][settingUartBaud][ERROR]: nolock_list_push failed.\r\n"));
-	}
+	  {
+	  	EJ_ErrPrintf(("[ej_cmd_uart.c][settingUartBaud][ERROR]: nolock_list_push failed.\r\n"));
+	  }
 			
     }else {
 
-      EJ_ErrPrintf(("[UARTCommands.c][settingUartBaud][ERROR]: EJ_mem_malloc pPacket->data failed.\r\n"));
+      EJ_ErrPrintf(("[ej_cmd_uart.c][settingUartBaud][ERROR]: EJ_mem_malloc pPacket->data failed.\r\n"));
     }
   }else {
 
-    EJ_ErrPrintf(("[UARTCommands.c][settingUartBaud][ERROR]: EJ_mem_malloc pPacket failed.\r\n"));
+    EJ_ErrPrintf(("[ej_cmd_uart.c][settingUartBaud][ERROR]: EJ_mem_malloc pPacket failed.\r\n"));
   }
 
   return pPacket;
@@ -1255,12 +1333,12 @@ uint8_t Process_SettingUartBaudRequestCB(uart2WifiPacket *pPacket)
 
 	if (nolock_list_push(GetWifi2deviceList(), pPacket) != 0x01)
 	  {
-	    EJ_ErrPrintf(("[UARTCommands.c][Process_SettingUartBaudRequestCB][ERROR]: nolock_list_push failed.\r\n"));
+	    EJ_ErrPrintf(("[ej_cmd_uart.c][Process_SettingUartBaudRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	  }
 				
       }else {
 
-	EJ_ErrPrintf(("[UARTCommands.c][Process_SettingUartBaudRequestCB][ERROR]: settingUartBaud failed.\r\n"));
+	EJ_ErrPrintf(("[ej_cmd_uart.c][Process_SettingUartBaudRequestCB][ERROR]: settingUartBaud failed.\r\n"));
       }
     }
   }
@@ -1282,7 +1360,7 @@ typedef struct {
 
 }PacketWifiPowerResponse;
 
-uint8_t ProcessWifiPowerRequest(uart2WifiPacket *pPacket)
+uint8_t Process_WifiPowerRequest(uart2WifiPacket *pPacket)
 {
   if (pPacket) {
 
@@ -1311,7 +1389,7 @@ uint8_t ProcessWifiPowerRequest(uart2WifiPacket *pPacket)
 
 	  if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	    {
-	      EJ_ErrPrintf(("[UARTCommands.c][ProcessWifiPowerRequest][ERROR]: nolock_list_push failed.\r\n"));
+	      EJ_ErrPrintf(("[ej_cmd_uart.c][Process_WifiPowerRequest][ERROR]: nolock_list_push failed.\r\n"));
 	    }
 
 	}
@@ -1364,7 +1442,7 @@ uint8_t Process_RenameWifiSSIDRequestCB(uart2WifiPacket *pPacket)
 
 	  if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	    {
-	      EJ_ErrPrintf(("[UARTCommands.c][Process_RenameWifiSSIDRequestCB][ERROR]: nolock_list_push failed.\r\n"));
+	      EJ_ErrPrintf(("[ej_cmd_uart.c][Process_RenameWifiSSIDRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	    }
 
 	  SetWifiConfigRenameSSID(request.ssid);
@@ -1416,12 +1494,12 @@ uart2WifiPacket * noticeLinkResult(uint8_t linkresult)
 
       pPacket = NULL;
 			
-      EJ_ErrPrintf(("[UARTCommands.c][noticeLinkResult][ERROR]: EJ_mem_malloc pPacket->data failed.\r\n"));
+      EJ_ErrPrintf(("[ej_cmd_uart.c][noticeLinkResult][ERROR]: EJ_mem_malloc pPacket->data failed.\r\n"));
     }
 
   }else {
 
-    EJ_ErrPrintf(("[UARTCommands.c][noticeLinkResult][ERROR]: EJ_mem_malloc pPacket failed.\r\n"));
+    EJ_ErrPrintf(("[ej_cmd_uart.c][noticeLinkResult][ERROR]: EJ_mem_malloc pPacket failed.\r\n"));
   }
 
   return pPacket;
@@ -1447,12 +1525,12 @@ uint8_t Process_DeviceEasyLinkRequestCB(uart2WifiPacket *pPacket)
 
 		  if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 			 {
-			    EJ_ErrPrintf(("[UARTCommands.c][Process_DeviceEasyLinkRequestCB][ERROR]: nolock_list_push failed.\r\n"));
+			    EJ_ErrPrintf(("[ej_cmd_uart.c][Process_DeviceEasyLinkRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 			 }
 				
       }else {
 
-			EJ_ErrPrintf(("[UARTCommands.c][Process_DeviceEasyLinkRequestCB][ERROR]: noticeNetworkStatus failed.\r\n"));
+			EJ_ErrPrintf(("[ej_cmd_uart.c][Process_DeviceEasyLinkRequestCB][ERROR]: noticeNetworkStatus failed.\r\n"));
       }
 
       if (request.configMode == WIFIMODULE_EASYCONNECT_MODE) {
@@ -1506,7 +1584,7 @@ uint8_t Process_DeviceRebootRequestCB(uart2WifiPacket *pPacket)
 
 	if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	  {
-	    EJ_ErrPrintf(("[UARTCommands.c][Process_DeviceRebootRequestCB][ERROR]: nolock_list_push failed.\r\n"));
+	    EJ_ErrPrintf(("[ej_cmd_uart.c][Process_DeviceRebootRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	  }
       }
     }
@@ -1547,7 +1625,7 @@ uint8_t Process_DeviceResetToFactoryRequestCB(uart2WifiPacket *pPacket)
 
 	if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	  {
-	    EJ_ErrPrintf(("[UARTCommands.c][Process_DeviceResetToFactoryRequestCB][ERROR]: nolock_list_push failed.\r\n"));
+	    EJ_ErrPrintf(("[ej_cmd_uart.c][Process_DeviceResetToFactoryRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	  }
       }
     }
@@ -1576,32 +1654,31 @@ uart2WifiPacket * queryDeviceStatus()
 
   }else {
 
-    EJ_ErrPrintf(("[UARTCommands.c][queryDeviceStatus][ERROR]: EJ_mem_malloc pPacket failed.\r\n"));
+    EJ_ErrPrintf(("[ej_cmd_uart.c][queryDeviceStatus][ERROR]: EJ_mem_malloc pPacket failed.\r\n"));
   }
 
   return pPacket;
 
 }
 
-
-
 void initUARTCommands() {
 	
   registerUartCommandCallback(UART2WIFICOMMANDS_READ_QOS_RESPONSE, Process_ReadDeviceQosResponseCB);
-  registerUartCommandCallback(UART2WIFICOMMANDS_READ_DEVICESN_RESPONSE, Process_readDeviceSNResponseCB);
+  registerUartCommandCallback(UART2WIFICOMMANDS_READ_DEVICESN_RESPONSE, Process_ReadDeviceSNResponseCB);
   registerUartCommandCallback(UART2WIFICOMMANDS_READ_DEVICEINFO_RESPONSE, Process_GetDeviceInfoResponseCB);
   registerUartCommandCallback(UART2WIFICOMMANDS_SET_UART_BAUD_RESPONSE, Process_SettingUartBaudRequestCB);
   registerUartCommandCallback(UART2WIFICOMMANDS_CHECK_NETWORK_STATE_REQUEST, Process_CheckNetworkStatusRequestCB);
   registerUartCommandCallback(UART2WIFICOMMANDS_SYNC_SYSTEMTIME_RESPONSE, Process_DeviceSyncSystemTimeRequestCB);
-  registerUartCommandCallback(UART2WIFICOMMANDS_QUERY_DEVICE_VERSION_RESPONSE, Process_queryDeviceVersionResponseCB);//0x61 uart?ìó|′|àí
-  registerUartCommandCallback(UART2WIFICOMMANDS_QUERY_DEVICE_UPDATE_RESPONSE, Process_judgeDeviceOTAResponseCB);//0x62 uart?ìó|′|àí
-  registerUartCommandCallback(UART2WIFICOMMANDS_ACTIVE_DEVICE_UPDATE_RESPONSE, Process_ActiveDeviceOtaResponseCB);
-  registerUartCommandCallback(UART2WIFICOMMANDS_WIFI_POWER_REQUEST, ProcessWifiPowerRequest);
+  registerUartCommandCallback(UART2WIFICOMMANDS_QUERY_DEVICE_VERSION_RESPONSE, Process_QueryDeviceVersionResponseCB);//0x61 uart?ìó|′|àí
+  registerUartCommandCallback(UART2WIFICOMMANDS_QUERY_DEVICE_UPDATE_RESPONSE, Process_JudgeDeviceOTAResponseCB);//0x62 uart?ìó|′|àí
+  registerUartCommandCallback(UART2WIFICOMMANDS_ACTIVE_DEVICE_UPDATE_RESPONSE, Process_ActiveDeviceOTAResponseCB);
+  registerUartCommandCallback(UART2WIFICOMMANDS_WIFI_POWER_REQUEST, Process_WifiPowerRequest);
   registerUartCommandCallback(UART2WIFICOMMANDS_RENAME_WIFISSID_REQUEST, Process_RenameWifiSSIDRequestCB);
   registerUartCommandCallback(UART2WIFICOMMANDS_EASY_LINK_REQUEST, Process_DeviceEasyLinkRequestCB);
   registerUartCommandCallback(UART2WIFICOMMANDS_REBOOT_RESPONSE, Process_DeviceRebootRequestCB);
   registerUartCommandCallback(UART2WIFICOMMANDS_RESET2FACTORY_RESPONSE, Process_DeviceResetToFactoryRequestCB);
   registerUartCommandCallback(UART2WIFICOMMANDS_READ_WIFIMODULE_PROPERTY_REQUEST, Process_DeviceGetWifiModulePropertyRequestCB);
+
 }
 
 

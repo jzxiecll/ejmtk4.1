@@ -433,9 +433,10 @@ void EJ_UartReceiveThread(void *arg)
 //									}
 								}
 								else if(pUart2WifiPacket->dataType == 0x63){
+									EJ_Printf("0x63  process.....\r\n");
 									if(nolock_list_push((nolock_list *)GetDevice2FirmwareOtaAckList(), pUart2WifiPacket) != 0x01)
 									{
-										
+										EJ_Printf("0x63  push failed!.....\r\n");
 										EJ_PacketUartFree(pUart2WifiPacket);
 									}
 

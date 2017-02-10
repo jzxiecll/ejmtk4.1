@@ -3,7 +3,7 @@
 static ej_thread_t mainLoop_thread;
 extern InfoManagement h_InfoManagement;
 extern ej_queue_t *ejEventQueue;
-static ej_thread_stack_define(mainLoop_stack, 2048);
+static ej_thread_stack_define(mainLoop_stack, 4096);
 ej_timer_t atTaskTimer=NULL;
 
 void atTaskTimerCB()
@@ -66,7 +66,8 @@ void setupAtTaskTimer()
 void initMainLoop(uint8_t isHomeAPConfig)
 {
 
-	EJ_Printf("Build Time: "__DATE__" "__TIME__"\r\n");
+	EJ_Printf("Build Time:: "__DATE__" "__TIME__"\r\n");
+	
 	int ret =0;
 	
 	SetWifiModuleStatusIsHomeAPConfig(isHomeAPConfig);
@@ -117,7 +118,7 @@ static void EJ_event_routerConnectedProcess(void* data)
 		EJ_Printf("Call EJ_user_init_MQTTThread \r\n");
 		/* if wifimodule is connected to home AP. */	
 		if (EJ_user_init_MQTTThread() == INIT_MQTT_SUCCESS) {
-				EJ_InfoPrintf(("[mainloop.c][mainLoop][INFO]: connect cloud services success.\r\n"));
+				EJ_InfoPrintf(("[ej_main.c][EJ_event_routerConnectedProcess][INFO]: connect cloud services success.\r\n"));
 				SetWifiModuleStatusCloudServiceStatus(CLOUD_CONNECTED);
 				uint8_t  pArrayMac[12]={0};
 				uint8_t  pArrayuuid[6]={0};
@@ -129,7 +130,7 @@ static void EJ_event_routerConnectedProcess(void* data)
 				}
 				if (nolock_list_push(GetWifi2cloudList(), pWifi2CloudPacket) != 0x01)
 				{
-					EJ_ErrPrintf(("[MQTTThread.c][Init_MQTTThread][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+					EJ_ErrPrintf(("[ej_main.c][EJ_event_routerConnectedProcess][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 				setupAtTaskTimer();					
 			}else{
@@ -249,7 +250,7 @@ static void EJ_event_MQTTConnectionLostProcess(void* data)
 	/*
 	*Need to Do ...................................
 	*/
-	EJ_ErrPrintf(("[mainloop.c][mainLoop][ERROR]: receive an mqtt connection lost event.\r\n"));
+	EJ_ErrPrintf(("[ej_main.c][EJ_event_MQTTConnectionLostProcess][ERROR]: receive an mqtt connection lost event.\r\n"));
 	//UnInit_MQTTThread();
 	EJ_user_uninit_MQTTThread();
 	SetWifiModuleStatusCloudServiceStatus(CLOUD_NOT_CONNECTED);
@@ -320,7 +321,7 @@ static void EJ_event_timeSyncProcess(void* data)
 	}
 	if (nolock_list_push(GetWifi2cloudList(), pWifi2CloudPacket) != 0x01)
 	{
-		EJ_ErrPrintf(("[MQTTThread.c][atTaskTimerCB][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+		EJ_ErrPrintf(("[ej_main.c][EJ_event_timeSyncProcess][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 	}
 
 }
@@ -389,33 +390,33 @@ static void EJ_Packet_Process(void* data)
 				wifi2CloudPacket *pReportWifiModuleInfo = (wifi2CloudPacket *)reportWifiModuleInfoToCloud();
 				if (pReportWifiModuleInfo&&(nolock_list_push(GetWifi2cloudList(), pReportWifiModuleInfo) != 0x01))
 				{
-					EJ_ErrPrintf(("[MQTTThread.c][Init_MQTTThread][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+					EJ_ErrPrintf(("[ej_main.c][EJ_Packet_Process][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 				
 				/* report wifimodule status to cloud. */
 				wifi2CloudPacket *pReportWifiModuleStatus = (wifi2CloudPacket *)reportWifiModuleNetworkStateToCloud();
 				if (pReportWifiModuleStatus&&(nolock_list_push(GetWifi2cloudList(), pReportWifiModuleStatus) != 0x01))
 				{
-					EJ_ErrPrintf(("[MQTTThread.c][Init_MQTTThread][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+					EJ_ErrPrintf(("[ej_main.c][EJ_Packet_Process][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 
 				/* report device info to cloud. */
 				wifi2CloudPacket *pReportDeviceInfo = (wifi2CloudPacket *)reportDeviceInfoToCloud();
 				if (pReportDeviceInfo&&(nolock_list_push(GetWifi2cloudList(), pReportDeviceInfo) != 0x01))
 				{
-					EJ_ErrPrintf(("[MQTTThread.c][Init_MQTTThread][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
+					EJ_ErrPrintf(("[ej_main.c][EJ_Packet_Process][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 
 				/* report device status to cloud. */
 				uart2WifiPacket * pUart2WifiPacket = (uart2WifiPacket *)queryDeviceStatus();
 				if (pUart2WifiPacket&&(nolock_list_push(GetWifi2deviceList(), pUart2WifiPacket) != 0x01))
 				{
-					EJ_ErrPrintf(("[mainLoop.c][mainLoop][ERROR]: add packet to wifi2devicelist failed.\r\n"));
+					EJ_ErrPrintf(("[ej_main.c][EJ_Packet_Process][ERROR]: add packet to wifi2devicelist failed.\r\n"));
 				}
 			}
 			
 		}else {
-			EJ_ErrPrintf(("[mainLoop.c][mainLoop][ERROR]: NULL MQTTCommand %x Callback.\r\n", commandID));
+			EJ_ErrPrintf(("[ej_main.c][EJ_Packet_Process][ERROR]: NULL MQTTCommand %x Callback.\r\n", commandID));
 		}
 		EJ_PacketCloudFree(pCloud2WifiPacket);
 		
@@ -436,7 +437,7 @@ static void EJ_Packet_Process(void* data)
 
 static void  EJ_event_handler(ej_event_t event,void *data)
 {	
-	EJ_DebugPrintf(("[EJ_PutEventSem][EJ_queue_recv] is %d\r\n",event));
+	EJ_DebugPrintf(("[ej_main.c][EJ_event_handler] is %d\r\n",event));
 	switch(event)
 			{
 				case  EJ_EVENT_shouldUARTThreadWorkSem:
@@ -655,7 +656,7 @@ void mainLoop(void* arg)
 						}
 						readCount = 0;
 						wifimoduleRunningStatus = WIFIMODULE_NORAML_RUNNING;
-						EJ_DebugPrintf(("[INFO2]: receive an uart2wifi packet  at WIFIMODULE_NORAML_RUNNING.\r\n"));		
+						EJ_DebugPrintf(("[mainLoop][INFO2]: receive an uart2wifi packet  at WIFIMODULE_NORAML_RUNNING.\r\n"));		
 					}
 					#endif
 				}

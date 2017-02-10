@@ -26,7 +26,7 @@ typedef struct {
 
 
 typedef struct {
-	uint8_t mac[6];
+	uint8_t mac[13];
 	uint8_t uuid[6];
 }EJ_DevInfo_t;
 

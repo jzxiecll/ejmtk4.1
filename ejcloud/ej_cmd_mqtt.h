@@ -7,6 +7,8 @@
 #include  "ej_utils.h"
 #include "WifiModuleStatus.h"
 wifi2CloudPacket * responseHeartBeatToClient(int dataID);
+wifi2CloudPacket *reportWifiUpgradeInfoToCloud();
+wifi2CloudPacket *ReportDeviceUpgradeInfoCloud(uint8_t data);
 
 #endif //__EJ_CMD_MQTT_H__
 

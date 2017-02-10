@@ -126,6 +126,7 @@ int EJ_timer_change(ej_timer_t *timer_t, ej_timer_tick ntime,
 int EJ_timer_deactivate(ej_timer_t *timer_t);
 bool EJ_timer_is_running(ej_timer_t *timer_t);
 int EJ_timer_activate(ej_timer_t *timer_t);
+int EJ_timer_reset(ej_timer_t *timer_t);
 
 /*
 ************************************************************************
