@@ -133,6 +133,27 @@ int  EJ_Wlan_get_mac_address(uint8_t  *mac)
 }
 
 
+int  EJ_Wlan_get_softap_name(uint8_t  *name)
+{
+	if(name == NULL)
+		return -EJ_E_INVAL; 
+	{
+		
+				char *sMacaddr = NULL;
+			    char buf[6];
+			    ej_get_mac_address(buf);
+				
+				sprintf(name,"eg_uAP_%02X%02X%02X%02X%02X%02X",
+						       buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
+
+ 	}
+	return EJ_SUCCESS;
+
+
+}
+
+
+
 int  EJ_Wlan_get_mac_address_posix(uint8_t  *buf)
 {
 	if(buf == NULL)

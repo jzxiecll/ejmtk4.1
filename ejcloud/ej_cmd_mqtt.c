@@ -986,6 +986,8 @@ void Process_WifiModuleConfigRequest(wifi2CloudPacket *pPacket)
 
 			EJ_WifiModuleConfig config;
 
+			memset(&config,0,sizeof(EJ_WifiModuleConfig));
+
 			config.ssidLength = pPacket->data[7];
 			//config.ssid = (uint8_t *)EJ_mem_malloc(config.ssidLength + 1);
 			memcpy(config.ssid, pPacket->data + 8, config.ssidLength);

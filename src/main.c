@@ -106,9 +106,10 @@ int main(void)
     config_ext.sta_wep_key_index = wifi_config.sta_default_key_id;
     config_ext.sta_auto_connect_present = 1;
     config_ext.sta_auto_connect = 1;
-
-	memcpy(config.ap_config.ssid, "eg_uAP_123456789ABC", 19);
-    config.ap_config.ssid_length = 19;
+	
+	//memcpy(config.ap_config.ssid, "eg_uAP_123456789ABC", 19);
+	EJ_Wlan_get_softap_name(config.ap_config.ssid);
+    config.ap_config.ssid_length = strlen(config.ap_config.ssid);
     memcpy(config.ap_config.password, wifi_config.ap_wpa_psk, 64);
     config.ap_config.password_length = wifi_config.ap_wpa_psk_len;
     config.ap_config.auth_mode = (wifi_auth_mode_t)wifi_config.ap_auth_mode;
