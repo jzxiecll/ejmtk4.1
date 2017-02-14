@@ -215,7 +215,7 @@ void  EJ_SetPacketDbgLevel(int level)
 
 void EJ_PrintUart2WifiPacket(uart2WifiPacket *pPacket, const char *prefix)
 {
-	if (EJ_PacketDbgLevel < EJ_DEBUG_INFO) {
+	if (EJ_PacketDbgLevel < EJ_DEBUG_INFO+1) {
 	    return;
 	}
 	if (pPacket) {
@@ -243,7 +243,7 @@ void EJ_PrintUart2WifiPacket(uart2WifiPacket *pPacket, const char *prefix)
 
 void EJ_PrintWifi2CloudPacket(wifi2CloudPacket *pPacket, const char *prefix)
 {
-	if (EJ_PacketDbgLevel < EJ_DEBUG_INFO+1) {
+	if (EJ_PacketDbgLevel < EJ_DEBUG_INFO) {
 	    return;
 	}
 	if (pPacket) {

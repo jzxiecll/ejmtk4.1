@@ -232,9 +232,9 @@ static void EJ_event_softAPRequestProcess(void* data)
 	*Need to Do ...................................
 	*/
 	/* set wificonfig flag to softAP, and reboot. */
-	//SetWifiConfigConfigMode(WIFICONFIG_AP_MODE);
+	SetWifiConfigConfigMode(WIFICONFIG_AP_MODE);
 	/* before reboot, should delay some ms to wait uart send thread.*/
-	EJ_thread_sleep(EJ_msec_to_ticks(100));
+	EJ_thread_sleep(EJ_msec_to_ticks(500));
 	EJ_App_network_configured(0);
 	EJ_App_reboot(0);
 }
@@ -328,11 +328,12 @@ static void EJ_event_homeApNotConfiguredProcess(void* data)
 {
 
 	unsigned char configMode = GetWifiConfigConfigMode();
-
+	EJ_Printf("EJ_event_homeApNotConfiguredProcess configMode = %d\r\n",configMode);
 	if (configMode == WIFICONFIG_NULL_MODE) {
 
 		configMode = GetDeviceInfoDefaultConfigMode();
 	}
+	EJ_Printf("EJ_event_homeApNotConfiguredProcess configMode = %d\r\n",configMode);
 	
 	EJ_WifiConfigProcess(configMode);
 		
@@ -435,10 +436,10 @@ static void EJ_Packet_Process(void* data)
 	nolock_list_pop(GetLan2wifiList(), (void **)&pLan2WifiPacket);
 
 	if (pLan2WifiPacket) {
-		//AJ_InfoPrintf(("[mainLoop.c][mainLoop][INFO]: receive an Lan2wifiPacket packet.\r\n"));
+		
 
 		uint32_t commandID = (uint32_t)(pLan2WifiPacket->dataType[1] << 8 | pLan2WifiPacket->dataType[0]);
-		
+		EJ_InfoPrintf(("[mainLoop.c][mainLoop][INFO]: receive an Lan2wifiPacket %04X.\r\n",commandID));
 		MQTTPacketProcessCB cb = getCallbackByMQTTCommandID(commandID);
 
 		if (cb != NULL) {

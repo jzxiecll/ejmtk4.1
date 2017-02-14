@@ -1,7 +1,7 @@
 #ifndef __EJ_PLATFORM_CONF_H__
 #define __EJ_PLATFORM_CONF_H__
 
-
+#define EJ_TEST_SERVER 1
 
 /*
 **************************************************************
@@ -19,7 +19,6 @@
 #define SERVER_TOPIC_TEST   "$USR/manageriotdevice15"
 
 #define MASTER_SERVER_PORT	1883
-
 #define CLOUD_DOMAIN_ADDR   "ej-test.com"
 
 

@@ -31,6 +31,12 @@ typedef struct {
 }EJ_DevInfo_t;
 
 
+typedef enum {
+		EJ_WLAN_MODE_STA = 1,
+		EJ_WLAN_MODE_AP
+
+}EJ_WlanMode_t;
+
 void EJ_init_dev();
 int    EJ_App_reboot(uint8_t reason);
 int   EJ_App_network_configured(unsigned char state);
@@ -56,6 +62,9 @@ bool EJ_Wlan_is_sta_connected();
 int EJ_Wlan_set_time(uint8_t *pTimeArray);
 int EJ_Wlan_get_time(uint8_t *pTimeArray);
 int  EJ_Device_get_uuid(uint8_t *pUuid);
+
+int  EJ_Wlan_store_network(EJ_WifiModuleConfig *config,EJ_WlanMode_t mode);
+int  EJ_Wlan_store_mode(EJ_WlanMode_t mode);
 
 
 

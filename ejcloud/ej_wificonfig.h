@@ -2,6 +2,7 @@
 #define __EJ_WIFICONFIG_H__
 
 #include "ej_porting_layer.h"
+#include "ej_event_manager.h"
 
 
 

@@ -450,8 +450,8 @@ static const group_data_item_t g_ap_data_item_array[] = {
     {
         "Ssid",
         NVDM_DATA_ITEM_TYPE_STRING,
-        "MTK_SOFT_AP",
-        sizeof("MTK_SOFT_AP")
+        "eg_uAP_1234",
+        sizeof("eg_uAP_1234")
     },
     {
         "SsidLen",

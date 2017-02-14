@@ -503,6 +503,12 @@ uint8_t storeWifiConfigConfigMode(uint8_t configMode)
   }else if (configMode == WIFICONFIG_AP_MODE) {
 
     ret = EJ_write_psm_item( "configMode", "WIFICONFIG_AP_MODE");
+  }else if (configMode == WIFICONFIG_AIRKISS_MODE) {
+
+    ret = EJ_write_psm_item( "configMode", "WIFICONFIG_AIRKISS_MODE");
+  }else{
+	
+	ret = EJ_write_psm_item( "configMode", "WIFICONFIG_NULL_MODE");
   }
 	
   if (ret) {
@@ -533,18 +539,22 @@ void loadWifiConfigConfigMode()
 
       SetWifiConfigConfigMode(WIFICONFIG_AP_MODE);
 			
-    }else if (strcmp(strval, "WIFICONFIG_NULL_MODE") == 0) {
+    }else if (strcmp(strval, "WIFICONFIG_AIRKISS_MODE") == 0) {
 
-      SetWifiConfigConfigMode(WIFICONFIG_NULL_MODE);
-    }
+      SetWifiConfigConfigMode(WIFICONFIG_AIRKISS_MODE);
+    }else {
+    
+	  SetWifiConfigConfigMode(WIFICONFIG_NULL_MODE);
+	  
+	}
   }
 
-  /* reset the configMode to NULL. */
-  ret = EJ_write_psm_item("configMode", "WIFICONFIG_NULL_MODE");
+//  /* reset the configMode to NULL. */
+//  ret = EJ_write_psm_item("configMode", "WIFICONFIG_NULL_MODE");
 
-  if (ret) {
-    EJ_ErrPrintf(("[WifiModuleStatus.c][loadWifiConfigConfigMode][ERROR]: Error set configMode to default WIFICONFIG_NULL_MODE.\r\n"));
-  }
+//  if (ret) {
+//    EJ_ErrPrintf(("[WifiModuleStatus.c][loadWifiConfigConfigMode][ERROR]: Error set configMode to default WIFICONFIG_NULL_MODE.\r\n"));
+//  }
 
 
 }

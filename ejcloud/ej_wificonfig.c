@@ -1125,7 +1125,10 @@ int32_t joylink_connection_disconnect_ap(void)
 	return wifi_connection_disconnect_ap();
 }
 
-
+int joylink_softap_connect()
+{
+	return EJ_Wlan_uap_start();
+}
 
 void EJ_WifiConfigProcess(unsigned char confgiMode)
 {
@@ -1134,6 +1137,8 @@ void EJ_WifiConfigProcess(unsigned char confgiMode)
 		{
 			case WIFICONFIG_AP_MODE:
 				EJ_Printf("[WifiConfigProcess] : WIFICONFIG_AP_MODE !\r\n");
+				joylink_softap_connect();
+				EJ_PutEventSem(EJ_EVENT_uapStartedSem);
 				break;
 			case WIFICONFIG_AIRKISS_MODE:
 				EJ_Printf("[WifiConfigProcess] : WIFICONFIG_AIRKISS_MODE !\r\n");		

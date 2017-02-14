@@ -484,16 +484,21 @@ opts_struct * GenerateMQTTConnectionerOpts()
 
 #else
 
-//	opt->host = "120.24.170.30";   
+	if(EJ_TEST_SERVER){
+		opt->host = SERVER_ADDR_TEST; //test
+		opt->pubTopic = SERVER_TOPIC_TEST;
 
-	opt->host = SERVER_ADDR_TEST; //test
+	}else{
+		opt->host = SERVER_ADDR_MASTER;   
+   		opt->pubTopic =SERVER_TOPIC_MASTER;
+	}
+
+
 #endif
 	opt->port = 1883;
 	opt->showtopics = 1;
 	opt->topic = "#";
 	opt->retained = 1;
-	opt->pubTopic = SERVER_TOPIC_TEST;
-	//opt->pubTopic = "$USR/manager";
 	opt->subTopic = (char *)EJ_mem_malloc(11 + 1);
 
 	if(!opt->subTopic){

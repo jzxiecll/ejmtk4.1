@@ -757,15 +757,32 @@ int EJ_Aes_udpBroadcast_Encrypt(unsigned char *pPlainTxt, unsigned int TextLen, 
 
 int EJ_Aes_lanMessageEncrypt(unsigned char *pPlainTxt, unsigned int TextLen, unsigned char *pCipTxt)
 {
-	return 0;
+
+	aes_context ctx;
+	unsigned char *result;
+	int slen;
+	aes_setkey_enc(&ctx, LANKEK, sizeof(LANKEK));
+	result = aes_crypt_ecb(&ctx, AES_ENCRYPT, pPlainTxt, TextLen, &slen);
+	memcpy(pCipTxt,result,slen);
+	EJ_mem_free(result);
+	return  slen;
 
 }
 
 int EJ_Aes_lanMessageDecrypt(unsigned char *pCipTxt, unsigned int CipTxtLen, unsigned char *pPlainTxt)
 {
 
+	aes_context ctx;
+	unsigned char *result;
+	int slen;
+	aes_setkey_dec(&ctx, LANKEK, sizeof(LANKEK));		
+	result = aes_crypt_ecb(&ctx, AES_DECRYPT, pCipTxt, CipTxtLen, &slen);		
+	memcpy(pPlainTxt,result,slen);	
+	EJ_mem_free(result);	
+	if(slen < 20)
+			return 0;
+	return  slen;
 	
-	return 0;
 }
 
 

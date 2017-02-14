@@ -1,6 +1,7 @@
 #include "ej_port_wlan.h"
 #include "wifi_api.h"
 #include "ej_wificonfig.h"
+#include "wifi_lwip_helper.h"
 #include "WifiModuleStatus.h"
 EJ_DevInfo_t _g_dev;
 
@@ -176,10 +177,6 @@ int  EJ_Wlan_set_ip_address(uint8_t* sIpaddr)
 	return EJ_SUCCESS;
 }
 
-
-
-
-
 int  EJ_Wlan_set_network(EJ_WifiModuleConfig *config)
 {
 
@@ -189,7 +186,46 @@ int  EJ_Wlan_set_network(EJ_WifiModuleConfig *config)
 	return 0 ;
 }
 
+int  EJ_Wlan_store_network(EJ_WifiModuleConfig *config,EJ_WlanMode_t mode)
+{
 
+	
+	EJ_Printf("SoftAP WifiModuleConfigRequest ssid = %s,%d,pwd = %s,%d\r\n",\
+						config->ssid,config->ssidLength,\
+						config->password,config->passwordLength);
+	switch(mode)
+	{
+		case EJ_WLAN_MODE_STA:
+			wifi_profile_set_ssid(WIFI_PORT_STA,config->ssid,config->ssidLength);
+			wifi_profile_set_wpa_psk_key(WIFI_PORT_STA,config->password,config->passwordLength);
+			break;
+		case EJ_WLAN_MODE_AP:
+			wifi_profile_set_ssid(WIFI_PORT_AP,config->ssid,config->ssidLength);
+			wifi_profile_set_wpa_psk_key(WIFI_PORT_AP,config->password,config->passwordLength);
+			break;
+		default:
+			break;
+
+	}
+	return 0 ;
+}
+
+int  EJ_Wlan_store_mode(EJ_WlanMode_t mode)
+{
+	switch(mode)
+	{
+		case EJ_WLAN_MODE_STA:
+			wifi_profile_set_opmode(WIFI_MODE_STA_ONLY);
+			break;
+		case EJ_WLAN_MODE_AP:
+			wifi_profile_set_opmode(WIFI_MODE_AP_ONLY);
+			break;
+		default:
+			break;
+	}
+	
+	return 0 ;
+}
 
 
 int  EJ_Wlan_get_network()
@@ -202,16 +238,17 @@ int  EJ_Wlan_get_network()
 
 int EJ_Wlan_sta_start()
 {	
-	wifi_set_opmode(0x01);
-	wifi_config_reload_setting();
+	wifi_set_opmode(WIFI_MODE_STA_ONLY);
+	//wifi_config_reload_setting();
 	return EJ_SUCCESS; 
 }
 
 
 int EJ_Wlan_sta_stop()
 {
-	wifi_config_set_opmode(0x01);
-	wifi_profile_set_opmode(0x01);
+//	wifi_config_set_opmode(0x01);
+//	wifi_profile_set_opmode(0x01);
+	lwip_net_stop(WIFI_MODE_STA_ONLY);
 	return EJ_SUCCESS;
 
 }
@@ -219,16 +256,18 @@ int EJ_Wlan_sta_stop()
 
 int EJ_Wlan_uap_start(char *ssid,char *passphrase)
 {
-	wifi_config_set_opmode(0x02);
-	wifi_config_reload_setting();
+//	wifi_config_set_opmode(0x02);
+//	wifi_config_reload_setting();
+	wifi_set_opmode(WIFI_MODE_AP_ONLY);
 	return EJ_SUCCESS;	
 }
 
 
 int EJ_Wlan_uap_stop()
 {
-	wifi_config_set_opmode(0x01);
-	wifi_profile_set_opmode(0x01);
+//	wifi_config_set_opmode(0x01);
+//	wifi_profile_set_opmode(0x01);
+	lwip_net_stop(WIFI_MODE_AP_ONLY);
 	return EJ_SUCCESS;	
 }
 

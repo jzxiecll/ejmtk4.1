@@ -75,6 +75,7 @@ uint8_t PutReApplyIDSem();
 uint8_t GetTimeSyncSem();
 uint8_t PutTimeSyncSem();
 
+int  EJ_PutEventSem( ej_event_t EventItem);
 
 
 #endif //_H_WIFIMODULE_EVENT_MANAGER_H_

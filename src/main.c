@@ -107,9 +107,24 @@ int main(void)
     config_ext.sta_auto_connect_present = 1;
     config_ext.sta_auto_connect = 1;
 
+	memcpy(config.ap_config.ssid, "eg_uAP_123456789ABC", 19);
+    config.ap_config.ssid_length = 19;
+    memcpy(config.ap_config.password, wifi_config.ap_wpa_psk, 64);
+    config.ap_config.password_length = wifi_config.ap_wpa_psk_len;
+    config.ap_config.auth_mode = (wifi_auth_mode_t)wifi_config.ap_auth_mode;
+    config.ap_config.encrypt_type = (wifi_encrypt_type_t)wifi_config.ap_encryp_type;
+    config.ap_config.channel = wifi_config.ap_channel;
+    config.ap_config.bandwidth = wifi_config.ap_bw;
+    config.ap_config.bandwidth_ext = WIFI_BANDWIDTH_EXT_40MHZ_UP;
+    config_ext.ap_wep_key_index_present = 1;
+    config_ext.ap_wep_key_index = wifi_config.ap_default_key_id;
+    config_ext.ap_hidden_ssid_enable_present = 1;
+    config_ext.ap_hidden_ssid_enable = wifi_config.ap_hide_ssid;
+
 	printf("config sta :  opmode = %d, ssid  = %s, password = %s\r\n",config.opmode,config.sta_config.ssid,
 						config.sta_config.password);
-   	
+   	printf("config ap :  opmode = %d, ssid  = %s, password = %s\r\n",config.opmode,config.ap_config.ssid,
+						config.ap_config.password);
     /* Initialize wifi stack and register wifi init complete event handler,
      * notes:  the wifi initial process will be implemented and finished while system task scheduler is running,
      *            when it is done , the WIFI_EVENT_IOT_INIT_COMPLETE event will be triggered */

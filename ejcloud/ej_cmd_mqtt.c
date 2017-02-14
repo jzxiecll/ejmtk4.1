@@ -985,17 +985,16 @@ void Process_WifiModuleConfigRequest(wifi2CloudPacket *pPacket)
 		if (pPacket->data) {
 
 			EJ_WifiModuleConfig config;
-			config.ssidLength = pPacket->data[23];
-			memcpy(config.ssid, pPacket->data + 24, config.ssidLength);
-			config.passwordLength = pPacket->data[24 + config.ssidLength];
-			memcpy(config.password, pPacket->data + 25 + config.ssidLength, config.passwordLength);
 
-			EJ_Wlan_set_network(&config);	
-			EJ_Wlan_sta_start();
+			config.ssidLength = pPacket->data[7];
+			//config.ssid = (uint8_t *)EJ_mem_malloc(config.ssidLength + 1);
+			memcpy(config.ssid, pPacket->data + 8, config.ssidLength);
 
-
-			EJ_mem_free(config.ssid);
-			EJ_mem_free(config.password);
+			config.passwordLength = pPacket->data[8 + config.ssidLength];
+			//config.password = (uint8_t *)EJ_mem_malloc(config.passwordLength + 1);
+			memcpy(config.password, pPacket->data + 9 + config.ssidLength, config.passwordLength);
+	
+			EJ_Wlan_store_network(&config,EJ_WLAN_MODE_STA);	
 
 			/* send response.*/
 			PacketWifiModuleConfigResponse configResponse;
@@ -1034,18 +1033,29 @@ void Process_WifiModuleConfigRequest(wifi2CloudPacket *pPacket)
 				if (nolock_list_push(GetWifi2lanList(), pResponsePacket) != 0x01)
 				{
 					EJ_ErrPrintf(("[Process_WifiModuleConfigRequest][ERROR]: add packet to wifi2udplist failed.\r\n"));
+				}else
+				{
+					EJ_PrintWifi2CloudPacket(pResponsePacket,"Wifi2Cloud");
 				}
-
-				EJ_thread_sleep(EJ_msec_to_ticks(1000));
+				EJ_App_network_configured(1);
+				EJ_Wlan_store_mode(EJ_WLAN_MODE_STA);
+				EJ_thread_sleep(EJ_msec_to_ticks(3000));
 
 				/* if wifi uap is running, then shutdown it. */
-				if (EJ_Wlan_is_uap_started()) {
-					
-					//app_uap_stop();
-					EJ_Wlan_uap_stop();
-				}
+//				if (EJ_Wlan_is_uap_started()) {
+//					
+//					//app_uap_stop();
+//					EJ_Wlan_uap_stop();
+//				}
+				EJ_Wlan_store_mode(EJ_WLAN_MODE_STA);
+				EJ_App_reboot(1);
+				
 			}
+		
 
+			//EJ_Wlan_sta_start();
+			EJ_mem_free(config.ssid);
+			EJ_mem_free(config.password);
 		}
 	}
 }
