@@ -1142,7 +1142,7 @@ uint8_t loadInfoFromFlash()
   }
 
   ret = EJ_read_psm_item( "deviceType", strval, 2);
-  if (ret) {
+  if (ret!=0) {
 
     EJ_DebugPrintf(("[WifiModuleStatus.c][loadInfoFromFlash][ERROR]: Error get devieType.\r\n"));
   }
@@ -1151,7 +1151,7 @@ uint8_t loadInfoFromFlash()
   }
 
   ret = EJ_read_psm_item( "deviceTypeString", strval, 8);
-  if (ret) {
+  if (ret!=0) {
 
     EJ_DebugPrintf(("[WifiModuleStatus.c][loadInfoFromFlash][ERROR]: Error get deviceInfo deviceTypeString.\r\n"));
   }

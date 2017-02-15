@@ -25,7 +25,7 @@ unsigned char ej_smart_config_test(unsigned char len, unsigned char *param[])
 
 static unsigned char ej_cli_read_item(unsigned char *keyname)
 {
-	char tmp[256];
+	unsigned char tmp[256];
     int  nvdm_len = sizeof(tmp);
     int  status;
     status = EJ_read_psm_item(keyname,(unsigned char *)tmp,nvdm_len);

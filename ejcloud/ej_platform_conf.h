@@ -52,5 +52,7 @@
 */
 #define  STR_WIFI_MODULE_BRAND  "CCD" 
 #define  STR_WIFI_MODULE_MODE   "MT7687"
+
+#define  STR_WIFI_MODULE_FOTATOPIC  "100/1000/2000"
 #endif
 

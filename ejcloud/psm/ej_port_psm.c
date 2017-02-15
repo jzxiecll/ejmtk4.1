@@ -26,8 +26,8 @@ int EJ_read_psm_item(const char *keyname, uint8_t *value,unsigned int value_len)
 
 
 	 int status = nvdm_read_data_item("EJCLOUD", keyname,value,&value_len);
-	 if('\0' == *value)//???????
-        return 1;
+//	 if('\0' == *value)//???????
+//        return 1;
 	return status;
 }
 

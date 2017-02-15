@@ -7,6 +7,7 @@
 #include <lwip/ip.h>
 #include <lwip/inet_chksum.h>
 #include "ej_porting_layer.h"
+#include "ej_utils.h"
 
 
 #define REASON_USER_REBOOT                  (5)

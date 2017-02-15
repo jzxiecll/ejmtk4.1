@@ -10,6 +10,14 @@ static  int ej_get_mac_address(uint8_t *mac)
 	return wifi_config_get_mac_address(WIFI_PORT_STA, mac);
 }
 
+static  int ej_get_device_uuid(uint8_t *uuid)
+{
+	int  uuid_len = 7;
+    int  status;
+    status = EJ_read_psm_item("UUID",(unsigned char *)uuid,uuid_len);
+	return status;
+}
+
 void EJ_init_dev()
 {
 	char mac[13]; 
@@ -319,15 +327,26 @@ bool EJ_Wlan_is_sta_connected()
 #define EJ_UUID_LEN 6
 int  EJ_Device_get_uuid(uint8_t *pUuid)
 {
-	int  uuid_len = EJ_UUID_LEN;
+	unsigned char tmp[10];
+    int  nvdm_len = sizeof(tmp);
     int  status;
-    status = EJ_read_psm_item("UUID",(unsigned char *)pUuid,uuid_len);
+    status = EJ_read_psm_item("UUID",(unsigned char *)tmp,nvdm_len);
+	//EJ_Printf("EJ_Device_get_uuid,uuid=%s,status=%d\r\n",tmp,status);
 
-	if(!status)
+	if(status==0)
 	{
-
+		memcpy(pUuid,tmp,6);
 	}else{
 		memcpy(pUuid,_g_dev.uuid,6);
 	}
+//	memcpy(pUuid,_g_dev.uuid,6);
 	return 0 ;
 }
+
+
+
+int  EJ_Wlan_get_fota_topic(uint8_t *fotatopic)
+{
+	return 0 ;
+}
+

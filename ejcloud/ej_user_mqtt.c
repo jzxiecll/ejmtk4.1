@@ -212,7 +212,7 @@ static uint8_t EJ_ConnectToMQTTServer()
 	connectData.will.qos = 1;
 
 	if ((rc = MQTTConnect(&opts->client, &connectData)) != 0) {
-		EJ_ErrPrintf(("[MQTTThread.c][ConnectToMQTTServer][ERROR]: connnect MQTT server failed.\r\n"));
+		EJ_ErrPrintf(("[ej_user_mqtt.c][ConnectToMQTTServer][ERROR]: connnect MQTT server failed.\r\n"));
 		if (opts->network.my_socket) {
 			close(opts->network.my_socket);
 			opts->network.my_socket = -1;
@@ -221,7 +221,7 @@ static uint8_t EJ_ConnectToMQTTServer()
 		return MQTT_CONNECTED_ERROR;
 	}
 	else
-		EJ_AlwaysPrintf(("[MQTTThread.c][ConnectToMQTTServer][INFO]: connnect MQTT server success.\r\n"));
+		EJ_AlwaysPrintf(("[ej_user_mqtt.c][ConnectToMQTTServer][INFO]: connnect MQTT server success.\r\n"));
 #if 0
 	//if ((rc = MQTTSubscribe(&opts->client, opts->subTopic, 2, messageArrived)) != 0)
 	if ((rc = MQTTSubscribe(&opts->client, "F0AD4E0335E9", 2, EJ_messageArrived)) != 0)
@@ -233,14 +233,17 @@ static uint8_t EJ_ConnectToMQTTServer()
 #else
 		static  uint8_t  TopicUuid[EJ_USER_UUID_STRTING_LEN+1]={0};
 		static  uint8_t  TopicMac[EJ_USER_MAC_STRTING_LEN+1]={0};
+		
 		EJ_Wlan_get_mac_address(TopicMac);
-		EJ_Device_get_uuid(TopicUuid);		
+		EJ_Device_get_uuid(TopicUuid);
+		
 		EJ_Printf("%s->uuid:%s,mac:%s\r\n",__FUNCTION__,TopicUuid,TopicMac);
 		if ((rc = MQTTSubscribe(&opts->client, (const char*)TopicMac, 2, EJ_messageArrived)) != 0)
-			EJ_ErrPrintf(("[MQTTThread.c][ConnectToMQTTServer][ERROR]: Unable to subscribe topic1.\r\n"));
+			EJ_ErrPrintf(("[ej_user_mqtt.c][ConnectToMQTTServer][ERROR]: Unable to subscribe topic1.\r\n"));
 		if ((rc = MQTTSubscribe(&opts->client, (const char*)TopicUuid, 2, EJ_messageArrived)) != 0)
-			EJ_ErrPrintf(("[MQTTThread.c][ConnectToMQTTServer][ERROR]: Unable to subscribe topic2.\r\n"));
-
+			EJ_ErrPrintf(("[ej_user_mqtt.c][ConnectToMQTTServer][ERROR]: Unable to subscribe topic2.\r\n"));	
+		if ((rc = MQTTSubscribe(&opts->client, STR_WIFI_MODULE_FOTATOPIC, 2, EJ_messageArrived)) != 0)
+			EJ_ErrPrintf(("[ej_user_mqtt.c][ConnectToMQTTServer][ERROR]: Unable to subscribe topic2.\r\n"));
 #endif
 	return MQTT_CONNECTED_SUCCESS;
 }
