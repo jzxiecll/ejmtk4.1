@@ -222,6 +222,9 @@ APP_FILES      += $(APP_PATH)/ejcloud/nolock-list.c
 APP_FILES      += $(APP_PATH)/ejcloud/WifiModuleStatus.c
 APP_FILES      += $(APP_PATH)/ejcloud/joycfg.c
 APP_FILES      += $(APP_PATH)/ejcloud/ej_user_lanserver.c
+APP_FILES      += $(APP_PATH)/ejcloud/airkiss/airkiss.c
+
+APP_AIRKISS    += $(APP_PATH)/ejcloud/airkiss/libairkiss.a
 
 ifeq ($(MTK_MINICLI_ENABLE),y)
 APP_FILES      += $(APP_PATH_SRC)/cli_def.c
@@ -282,6 +285,7 @@ CFLAGS += -I$(SOURCE_DIR)/$(APP_PATH)/ejcloud/psm
 CFLAGS += -I$(SOURCE_DIR)/$(APP_PATH)/ejcloud/time
 CFLAGS += -I$(SOURCE_DIR)/$(APP_PATH)/ejcloud/wlan
 CFLAGS += -I$(SOURCE_DIR)/$(APP_PATH)/ejcloud/ota
+CFLAGS += -I$(SOURCE_DIR)/$(APP_PATH)/ejcloud/airkiss
 CFLAGS += -I$(SOURCE_DIR)/driver/chip/$(IC_CONFIG)/inc
 CFLAGS += -I$(SOURCE_DIR)/driver/chip/inc
 CFLAGS += -I$(SOURCE_DIR)/driver/board/mt76x7_hdk/ept/inc

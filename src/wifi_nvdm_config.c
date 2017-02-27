@@ -243,13 +243,13 @@ static const group_data_item_t g_sta_data_item_array[] = {
         "Ssid",
         NVDM_DATA_ITEM_TYPE_STRING,
         "MTK_SOFT_AP",
-        sizeof("CCD_WIFI_GROUP")
+        sizeof("MTK_SOFT_AP")
     },
     {
         "SsidLen",
         NVDM_DATA_ITEM_TYPE_STRING,
         "11",
-        sizeof("14")
+        sizeof("11")
     },
     {
         "BssType",
@@ -528,14 +528,14 @@ static const group_data_item_t g_ap_data_item_array[] = {
     {
         "AuthMode",
         NVDM_DATA_ITEM_TYPE_STRING,
-        "0",
-        sizeof("0")
+        "9",
+        sizeof("9")
     },
     {
         "EncrypType",
         NVDM_DATA_ITEM_TYPE_STRING,
-        "1",
-        sizeof("1")
+        "8",
+        sizeof("8")
     },
     {
         "WpaPsk",

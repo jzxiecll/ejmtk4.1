@@ -153,7 +153,7 @@ typedef void (* wifi_smart_connect_callback_t) (wifi_smart_connect_event_t event
 *
 * @return #WIFI_SMART_CONNECTION_OK, if the operation completed successfully.
 */
-wifi_smart_connect_status_t wifi_smart_connect_init (const uint8_t *key, const uint8_t key_length, wifi_smart_connect_callback_t  callback);
+wifi_smart_connect_status_t wifi_smart_connect_init (uint8_t configmode,const uint8_t *key, const uint8_t key_length, wifi_smart_connect_callback_t  callback);
 
 /**
 * @brief This function de-initializes the Smart Connection and releases the resources.
@@ -334,7 +334,7 @@ typedef struct {
 *
 * @return  None
 */
-void smtcn_stop_switch(void);
+void smt_stop_switch(void);
 
 /**
 * @brief When locked channel timeout, you can use this function to continue
@@ -344,7 +344,7 @@ void smtcn_stop_switch(void);
 *
 * @return  None
 */
-void smtcn_continue_switch(void);
+void smt_continue_switch(void);
 
 /**
 * @brief This function can be called to create a thread to process smart connection..

@@ -11,6 +11,7 @@
 //#include "joylink_porting_smtconn.h"
 //#include "joylink_porting_smt.h"
 #include "joycfg.h"
+#include "airkiss.h"
 //#include "joycfg.c"
 #include "ej_wificonfig.h"
 #include "wifi_api.h"
@@ -60,6 +61,8 @@ uint8_t smt_rx_buf_idx = 0;
 
 #if (CFG_SUPPORT_SMNT_PROTO == 4)
 extern smt_proto_ops jy_proto_ops;
+extern smt_proto_ops ak_proto_ops;
+
 #endif
 
 SemaphoreHandle_t smt_config_mutex = NULL;
@@ -827,10 +830,14 @@ void wifi_smart_connect_deinit(void)
     smt_evt_cb = NULL;
 }
 
-wifi_smart_connect_status_t wifi_smart_connect_init (const uint8_t *key, const uint8_t key_length, wifi_smart_connect_callback_t  callback)
+wifi_smart_connect_status_t wifi_smart_connect_init (uint8_t configmode,const uint8_t *key, const uint8_t key_length, wifi_smart_connect_callback_t  callback)
 {
 
 	psmt_proto_ops = &jy_proto_ops;
+//	if(configmode == WIFICONFIG_AIRKISS_MODE)
+//	{
+//		psmt_proto_ops = &ak_proto_ops;
+//	}
 
     if (smt_config_mutex == NULL) {
         smt_config_mutex = xSemaphoreCreateMutex();
@@ -1098,7 +1105,7 @@ int32_t joylink_smart_connect(void)
 
 
 	printf("joylink start ..............................\r\n");
-    if(wifi_smart_connect_init(NULL, 0, smt_evt_handler) < 0){
+    if(wifi_smart_connect_init(WIFICONFIG_AIRKISS_MODE,NULL, 0, smt_evt_handler) < 0){
         return -1;
     }
 
