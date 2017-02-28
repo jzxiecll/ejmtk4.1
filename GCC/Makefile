@@ -224,8 +224,8 @@ APP_FILES      += $(APP_PATH)/ejcloud/joycfg.c
 APP_FILES      += $(APP_PATH)/ejcloud/ej_user_lanserver.c
 APP_FILES      += $(APP_PATH)/ejcloud/airkiss/airkiss.c
 
-APP_AIRKISS    += $(APP_PATH)/ejcloud/airkiss/libairkiss.a
-
+#APP_AIRKISS    += $(APP_PATH)/ejcloud/airkiss/libairkiss.a
+LIBS += $(OUTPATH)/libairkiss.a
 ifeq ($(MTK_MINICLI_ENABLE),y)
 APP_FILES      += $(APP_PATH_SRC)/cli_def.c
 APP_FILES      += $(APP_PATH_SRC)/cli_cmds.c

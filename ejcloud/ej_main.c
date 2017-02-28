@@ -218,7 +218,12 @@ static void EJ_event_easylinkRequestProcess (void* data)
 	}
 	SetWifiModuleStatusIsHomeAPConfig(HOMEAP_NOT_CONFIGURED);
 	/* set wificonfig flag to softAP, and reboot. */
-	SetWifiConfigConfigMode(WIFICONFIG_EZCONNECT_MODE);
+	if(*(uint8_t*)data == WIFICONFIG_AIRKISS_MODE)
+	{
+		SetWifiConfigConfigMode(WIFICONFIG_AIRKISS_MODE);
+	}else{
+		SetWifiConfigConfigMode(WIFICONFIG_EZCONNECT_MODE);
+	}
 	/* before reboot, should delay some ms to wait uart send thread.*/
 	EJ_thread_sleep(EJ_msec_to_ticks(100));	
 	EJ_App_network_configured(0);	
@@ -505,7 +510,8 @@ static void  EJ_event_handler(ej_event_t event,void *data)
 					}
 				case  EJ_EVENT_airkissRequestSem:
 					{	
-						EJ_event_airkissRequestProcess(NULL);
+						uint8_t configmode  = WIFICONFIG_AIRKISS_MODE;
+						EJ_event_airkissRequestProcess(&configmode);
 						break;
 					}
 				case  EJ_EVENT_MQTTConnectionLostSem:

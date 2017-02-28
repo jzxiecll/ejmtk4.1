@@ -1,13 +1,13 @@
 #include "app_cli.h"
 
-unsigned char ej_smart_config_test(unsigned char len, unsigned char *param[])
+unsigned char ej_smart_config_ezconnect(unsigned char len, unsigned char *param[])
 {
     unsigned char status = 0;
     signed int ret = 0;
 
     if (len == 1) {
-        if (!strcmp(param[0], "connect")) {
-            ret = joylink_smart_connect();
+        if (!strcmp(param[0], "start")) {
+            ret = joylink_smart_connect(WIFICONFIG_EZCONNECT_MODE);
         } else if (!strcmp(param[0], "stop")) {
             ret = joylink_smart_stop();
         } else {
@@ -23,6 +23,30 @@ unsigned char ej_smart_config_test(unsigned char len, unsigned char *param[])
     return 0;
 }
 
+
+unsigned char ej_smart_config_airkiss(unsigned char len, unsigned char *param[])
+{
+    unsigned char status = 0;
+    signed int ret = 0;
+
+    if (len == 1) {
+        if (!strcmp(param[0], "start")) {
+            ret = joylink_smart_connect(WIFICONFIG_AIRKISS_MODE);
+        } else if (!strcmp(param[0], "stop")) {
+            ret = joylink_smart_stop();
+        } else {
+            EJ_Printf("Not supported cmd\n");
+            return 1;
+        }
+        if (ret < 0) {
+            status = 1;
+        }
+        EJ_Printf("ej_smart_config_airkiss(), ret:%s, Code=%ld\n", EJ_CLI_RETURN_STRING(ret), ret);
+        return status;
+    } 
+    return 0;
+}
+
 static unsigned char ej_cli_read_item(unsigned char *keyname)
 {
 	unsigned char tmp[256];
@@ -30,13 +54,13 @@ static unsigned char ej_cli_read_item(unsigned char *keyname)
     int  status;
     status = EJ_read_psm_item(keyname,(unsigned char *)tmp,nvdm_len);
     if (status == 0) {
-        printf("%s",keyname);
-        printf(" = ");
-        printf("%s",tmp);
-        printf("\r\n");
+        EJ_Printf("%s",keyname);
+        EJ_Printf(" = ");
+        EJ_Printf("%s",tmp);
+        EJ_Printf("\r\n");
     } else {
-        printf("the data item is not exist");
-        printf("\r\n");
+        EJ_Printf("the data item is not exist");
+        EJ_Printf("\r\n");
     }
     return 0;
 }
@@ -119,7 +143,7 @@ void ej_cli_get_softwareversion(int argc, char *argv[])
 
 	sprintf(moduleverinfo,"%d%d%d%d%d",Version.hardwareVersion,Version.softwareVersionMsb,Version.softwareVersionLsb,Version.publishYear,Version.publishWeek);
 
-	printf("[SoftWare_Version]: %s%s_%s_%s\r\n",mVersion,moduleverinfo,"00",data);	
+	EJ_Printf("[SoftWare_Version]: %s%s_%s_%s\r\n",mVersion,moduleverinfo,"00",data);	
 }
 
 

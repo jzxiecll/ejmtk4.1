@@ -266,7 +266,7 @@ void user_wifi_app_entry(void *args)
 					initMainLoop(isHomeAPConfig);
 					break;
 				case EJ_IOT_EVENT_UNCONFIGED:
-					joylink_smart_connect();
+					joylink_smart_connect(WIFICONFIG_EZCONNECT_MODE);
 					break;
 				default:				
 					break;

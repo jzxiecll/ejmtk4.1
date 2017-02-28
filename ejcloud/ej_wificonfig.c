@@ -71,6 +71,8 @@ xQueueHandle smt_rx_queue = NULL;
 /* smart connection thread wait scan done.*/
 static SemaphoreHandle_t scan_done_mutex = NULL;
 
+static uint8_t ej_smt_configmode = 0;
+
 typedef struct {
     uint8_t    *payload;
     uint32_t    len;
@@ -667,11 +669,20 @@ uint8_t smt_current_channel(void)
 }
 void smt_stop_switch(void)
 {
-#if (CFG_SUPPORT_SMNT_PROTO == 2||CFG_SUPPORT_SMNT_PROTO == 3)
-    xTimerStop(switch_channel_timer, tmr_nodelay);
-#else
-	xTimerStop(joy_lock_timer, tmr_nodelay);
-#endif	
+//#if (CFG_SUPPORT_SMNT_PROTO == 2||CFG_SUPPORT_SMNT_PROTO == 3)
+//    xTimerStop(switch_channel_timer, tmr_nodelay);
+//#else
+//	xTimerStop(joy_lock_timer, tmr_nodelay);
+//#endif	
+
+	if(ej_smt_configmode != WIFICONFIG_EZCONNECT_MODE)
+	{
+		xTimerStop(switch_channel_timer, tmr_nodelay);
+	}
+	else
+	{
+		xTimerStop(joy_lock_timer, tmr_nodelay);
+	}
 
     if(smt_evt_cb) {
         (*smt_evt_cb)(WIFI_SMART_CONNECTION_EVENT_CHANNEL_LOCKED, NULL);
@@ -688,12 +699,16 @@ void smt_continue_switch(void)
     switch_next_channel(NULL);
 
 	
-#if (CFG_SUPPORT_SMNT_PROTO == 2||CFG_SUPPORT_SMNT_PROTO == 3)
-	 xTimerStart(switch_channel_timer, tmr_nodelay);
-//#else
-//	xTimerStart(joy_lock_timer, tmr_nodelay);
-#endif
-  
+//#if (CFG_SUPPORT_SMNT_PROTO == 2||CFG_SUPPORT_SMNT_PROTO == 3)
+//	 xTimerStart(switch_channel_timer, tmr_nodelay);
+////#else
+////	xTimerStart(joy_lock_timer, tmr_nodelay);
+//#endif
+
+	if(ej_smt_configmode != WIFICONFIG_EZCONNECT_MODE)
+	{
+		xTimerStart(switch_channel_timer, tmr_nodelay);
+	}
 }
 
 int smt_done(void)
@@ -832,12 +847,15 @@ void wifi_smart_connect_deinit(void)
 
 wifi_smart_connect_status_t wifi_smart_connect_init (uint8_t configmode,const uint8_t *key, const uint8_t key_length, wifi_smart_connect_callback_t  callback)
 {
-
-	psmt_proto_ops = &jy_proto_ops;
-//	if(configmode == WIFICONFIG_AIRKISS_MODE)
-//	{
-//		psmt_proto_ops = &ak_proto_ops;
-//	}
+	ej_smt_configmode = configmode;
+	
+	if(ej_smt_configmode == WIFICONFIG_AIRKISS_MODE)
+	{
+		psmt_proto_ops = &ak_proto_ops;
+	}else
+	{
+		psmt_proto_ops = &jy_proto_ops;
+	}
 
     if (smt_config_mutex == NULL) {
         smt_config_mutex = xSemaphoreCreateMutex();
@@ -952,11 +970,19 @@ wifi_smart_connect_status_t wifi_smart_connect_start (uint16_t timeout_seconds)
     channel_times[smt_conn_st.cur_chanl - 1]++;
 #endif
 
-#if (CFG_SUPPORT_SMNT_PROTO == 2||CFG_SUPPORT_SMNT_PROTO == 3)
-    xTimerStart(switch_channel_timer, tmr_nodelay);
-#else
-	xTimerStart(joy_lock_timer, tmr_nodelay);
-#endif
+//#if (CFG_SUPPORT_SMNT_PROTO == 2||CFG_SUPPORT_SMNT_PROTO == 3)
+//    xTimerStart(switch_channel_timer, tmr_nodelay);
+//#else
+//	xTimerStart(joy_lock_timer, tmr_nodelay);
+//#endif
+
+	if(ej_smt_configmode == WIFICONFIG_EZCONNECT_MODE)
+	{
+		xTimerStart(joy_lock_timer, tmr_nodelay);
+	}else
+	{
+		 xTimerStart(switch_channel_timer, tmr_nodelay);
+	}
 
     return WIFI_SMART_CONNECTION_OK;
 }
@@ -1100,15 +1126,15 @@ void smt_evt_handler(wifi_smart_connect_event_t event, void *data)
     }
 }
 
-int32_t joylink_smart_connect(void)
+int joylink_smart_connect(uint8_t  configmode)
 {
 
 
-	printf("joylink start ..............................\r\n");
-    if(wifi_smart_connect_init(WIFICONFIG_AIRKISS_MODE,NULL, 0, smt_evt_handler) < 0){
+	EJ_Printf("joylink start ,configmode = %d..............................\r\n",configmode);
+    if(wifi_smart_connect_init(configmode,NULL, 0, smt_evt_handler) < 0){
         return -1;
     }
-
+	EJ_Printf("joylink start ,configmode = %d..............................\r\n",configmode);
     if(!wifi_smart_connect_start(0))
     {
     	//joycfg_profile_set_configfree(1);
@@ -1148,15 +1174,17 @@ void EJ_WifiConfigProcess(unsigned char confgiMode)
 				EJ_PutEventSem(EJ_EVENT_uapStartedSem);
 				break;
 			case WIFICONFIG_AIRKISS_MODE:
-				EJ_Printf("[WifiConfigProcess] : WIFICONFIG_AIRKISS_MODE !\r\n");		
+				EJ_Printf("[WifiConfigProcess] : WIFICONFIG_AIRKISS_MODE !\r\n");
+				joylink_smart_connect(WIFICONFIG_AIRKISS_MODE);
+				break;
 				break;
 			case WIFICONFIG_EZCONNECT_MODE:	
 				EJ_Printf("[WifiConfigProcess] : WIFICONFIG_EZCONNECT_MODE !\r\n");
-				joylink_smart_connect();
+				joylink_smart_connect(WIFICONFIG_EZCONNECT_MODE);
 				break;
 			default:
 				EJ_Printf("[WifiConfigProcess] : default !\r\n");
-				joylink_smart_connect();
+				joylink_smart_connect(WIFICONFIG_EZCONNECT_MODE);
 				break;
 		}
 		

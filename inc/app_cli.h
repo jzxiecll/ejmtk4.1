@@ -15,7 +15,9 @@
 
 
 
-unsigned char ej_smart_config_test(unsigned char len, unsigned char *param[]);
+unsigned char ej_smart_config_ezconnect(unsigned char len, unsigned char *param[]);
+unsigned char ej_smart_config_airkiss(unsigned char len, unsigned char *param[]);
+
 unsigned char ej_cli_Deviceid();
 unsigned char ej_cli_uuid();
 void ej_cli_modify_server(int argc, char *argv[]);
@@ -25,8 +27,8 @@ void ej_cli_get_softwareversion(int argc, char *argv[]);
 void ej_cli_wifi_fota_http(int argc, char *argv[]);
 
 
-
-#define EJ_CLI_SMNT_ENTRY     { "ejsmart",   "<Ejcloud Smart Connection>", ej_smart_config_test },
+#define EJ_CLI_AIRKISS_ENTRY     { "airkiss",   "<Ejcloud airkiss Connection>", ej_smart_config_airkiss },
+#define EJ_CLI_EZCONNECT_ENTRY     { "ezconnect",   "<Ejcloud ezconnect Connection>", ej_smart_config_ezconnect },
 #define EJ_CLI_DID      { "did",   "<Ejcloud Get Deviceid>", ej_cli_Deviceid},
 #define EJ_CLI_UUID     { "uuid",   "<Ejcloud Get Uuid>", ej_cli_uuid},
 
@@ -38,7 +40,8 @@ void ej_cli_wifi_fota_http(int argc, char *argv[]);
 #define EJ_CLI_FOTA_HTTP  {"updatefw", "<Ejcloud Wifi fota http url>", ej_cli_wifi_fota_http},
 
 
-#define EJ_CLI_CMDS     EJ_CLI_SMNT_ENTRY\
+#define EJ_CLI_CMDS     EJ_CLI_EZCONNECT_ENTRY\
+						EJ_CLI_AIRKISS_ENTRY\
 						EJ_CLI_DID\
 						EJ_CLI_UUID\
 						EJ_CLI_MSA\

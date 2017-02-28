@@ -13,9 +13,6 @@
 extern "C" {
 #endif
 
-
-
-
 typedef enum {
 
 	WIFICONFIG_START,
@@ -29,10 +26,12 @@ typedef enum {
 	WIFICONFIG_EZCONNECT_MODE,
 	WIFICONFIG_AP_MODE,
 	WIFICONFIG_AIRKISS_MODE,
+	WIFICONFIG_JOYLINK_MODE,
+	WIFICONFIG_ALI_MODE,
+	WIFICONFIG_CLIENT_MODE,
 	WIFICONFIG_NULL_MODE,
 
 };
-
 
 typedef enum _ENUM_MAC_RX_GROUP_VLD_T {
     RX_GROUP_VLD_1 = 0,
@@ -244,8 +243,8 @@ int32_t joycfg_profile_set_configfree(uint8_t config_ready);
 #define switch_channel_timems   (100)          /* airkiss 100ms */
 #define locked_channel_timems   (10 * 1000)    /* 10s */
 #define use_smart_connection_filter  1
-#elif (CFG_SUPPORT_SMNT_PROTO == 4)            /* airkiss protocol */
-#define switch_channel_timems   (100)          /* airkiss 100ms */
+#elif (CFG_SUPPORT_SMNT_PROTO == 4)            /* ejconfig protocol */
+#define switch_channel_timems   (100)          /* ejconfig 100ms */
 #define locked_channel_timems   (10 * 1000)    /* 10s */
 #define use_smart_connection_filter  1
 
@@ -353,7 +352,7 @@ void smt_continue_switch(void);
 *
 * @return  0 means success, <0 means fail
 */
-int32_t joylink_smart_connect(void);
+int joylink_smart_connect(uint8_t  configmode);
 
 /**
 * @brief This function can be called to stop smart connection.
