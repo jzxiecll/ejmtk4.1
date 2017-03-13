@@ -173,7 +173,8 @@ static signed int  EJ_Iot_Init()
 			return  1;
 		}
 		if (nolock_list_push(GetWifi2deviceList(), pUart2WifiPacket) != 0x01)
-		{
+		{	
+			EJ_PacketUartFree(pUart2WifiPacket);
 			EJ_ErrPrintf(("[initMainLoop][ERROR]: add packet to wifi2devicelist failed.\r\n"));
 		}
 

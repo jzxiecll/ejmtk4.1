@@ -130,6 +130,7 @@ static void EJ_event_routerConnectedProcess(void* data)
 				}
 				if (nolock_list_push(GetWifi2cloudList(), pWifi2CloudPacket) != 0x01)
 				{
+					EJ_PacketCloudFree(pWifi2CloudPacket);
 					EJ_ErrPrintf(("[ej_main.c][EJ_event_routerConnectedProcess][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 				setupAtTaskTimer();					
@@ -304,6 +305,7 @@ static void EJ_event_reApplyIDProcess(void* data)
 	
 	if (nolock_list_push(GetWifi2cloudList(), pWifi2CloudPacket) != 0x01)
 	{
+		EJ_PacketCloudFree(pWifi2CloudPacket);
 		EJ_ErrPrintf(("[ERROR]: add reApplyID packet to wifi2cloudlist failed.\r\n"));
 	}else{
 		EJ_DebugPrintf(("[SUCCESS]: add reApplyID packet to wifi2cloudlist .\r\n"));
@@ -324,6 +326,7 @@ static void EJ_event_timeSyncProcess(void* data)
 	}
 	if (nolock_list_push(GetWifi2cloudList(), pWifi2CloudPacket) != 0x01)
 	{
+		EJ_PacketCloudFree(pWifi2CloudPacket);
 		EJ_ErrPrintf(("[ej_main.c][EJ_event_timeSyncProcess][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 	}
 
@@ -394,6 +397,7 @@ static void EJ_Packet_Process(void* data)
 				wifi2CloudPacket *pReportWifiModuleInfo = (wifi2CloudPacket *)reportWifiModuleInfoToCloud();
 				if (pReportWifiModuleInfo&&(nolock_list_push(GetWifi2cloudList(), pReportWifiModuleInfo) != 0x01))
 				{
+					EJ_PacketCloudFree(pReportWifiModuleInfo);
 					EJ_ErrPrintf(("[ej_main.c][EJ_Packet_Process][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 				
@@ -401,6 +405,7 @@ static void EJ_Packet_Process(void* data)
 				wifi2CloudPacket *pReportWifiModuleStatus = (wifi2CloudPacket *)reportWifiModuleNetworkStateToCloud();
 				if (pReportWifiModuleStatus&&(nolock_list_push(GetWifi2cloudList(), pReportWifiModuleStatus) != 0x01))
 				{
+					EJ_PacketCloudFree(pReportWifiModuleStatus);
 					EJ_ErrPrintf(("[ej_main.c][EJ_Packet_Process][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 
@@ -408,6 +413,7 @@ static void EJ_Packet_Process(void* data)
 				wifi2CloudPacket *pReportDeviceInfo = (wifi2CloudPacket *)reportDeviceInfoToCloud();
 				if (pReportDeviceInfo&&(nolock_list_push(GetWifi2cloudList(), pReportDeviceInfo) != 0x01))
 				{
+					EJ_PacketCloudFree(pReportDeviceInfo);
 					EJ_ErrPrintf(("[ej_main.c][EJ_Packet_Process][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 
@@ -415,6 +421,7 @@ static void EJ_Packet_Process(void* data)
 				uart2WifiPacket * pUart2WifiPacket = (uart2WifiPacket *)queryDeviceStatus();
 				if (pUart2WifiPacket&&(nolock_list_push(GetWifi2deviceList(), pUart2WifiPacket) != 0x01))
 				{
+					EJ_PacketCloudFree(pUart2WifiPacket);
 					EJ_ErrPrintf(("[ej_main.c][EJ_Packet_Process][ERROR]: add packet to wifi2devicelist failed.\r\n"));
 				}
 			}
@@ -601,6 +608,7 @@ void mainLoop(void* arg)
 					}
 					if (nolock_list_push(GetWifi2deviceList(), pUart2WifiPacket) != 0x01)
 					{
+						EJ_PacketUartFree(pUart2WifiPacket);
 						EJ_ErrPrintf(("[mainLoop][ERROR]: add packet to wifi2devicelist failed.\r\n"));
 					}
 					readCount++;
@@ -638,6 +646,7 @@ void mainLoop(void* arg)
 							}
 							if (nolock_list_push(GetWifi2deviceList(), pUart2WifiPacket) != 0x01)
 							{
+								EJ_PacketUartFree(pUart2WifiPacket);
 								EJ_ErrPrintf(("[mainLoop][ERROR]: add packet to wifi2devicelist failed.\r\n"));
 							}
 							wifimoduleRunningStatus = WIFIMODULE_NORAML_RUNNING;							
@@ -652,6 +661,7 @@ void mainLoop(void* arg)
 					}
 					if (nolock_list_push(GetWifi2deviceList(), pUart2WifiPacket) != 0x01)
 					{
+						EJ_PacketUartFree(pUart2WifiPacket);
 						EJ_ErrPrintf(("[mainLoop][ERROR]: add packet to wifi2devicelist failed.\r\n"));
 					}
 					readCount++;

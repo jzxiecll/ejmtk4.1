@@ -19,7 +19,13 @@ unsigned char ej_smart_config_ezconnect(unsigned char len, unsigned char *param[
         }
         EJ_Printf("ej_smart_config_test(), ret:%s, Code=%ld\n", EJ_CLI_RETURN_STRING(ret), ret);
         return status;
-    } 
+    }else{
+
+		EJ_Printf("usage:ezconnect <command>\r\n");
+		EJ_Printf("The most commonly used ezconnect commands are:\r\n\r\n");
+		EJ_Printf("	<start> start the ezconnect process\r\n");
+		EJ_Printf("	<stop>  Stop the ezconnect process\r\n");
+    }
     return 0;
 }
 
@@ -43,6 +49,12 @@ unsigned char ej_smart_config_airkiss(unsigned char len, unsigned char *param[])
         }
         EJ_Printf("ej_smart_config_airkiss(), ret:%s, Code=%ld\n", EJ_CLI_RETURN_STRING(ret), ret);
         return status;
+    }else{
+
+		EJ_Printf("usage:airkiss <command>\r\n");
+		EJ_Printf("The most commonly used airkiss commands are:\r\n\r\n");
+		EJ_Printf("	<start> start the airkiss process\r\n");
+		EJ_Printf("	<stop>  Stop the airkiss process\r\n");
     } 
     return 0;
 }

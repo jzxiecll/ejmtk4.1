@@ -553,7 +553,10 @@ void LANServerReceiveThread(void *arg)
 									if ((pPacket->dataType[0] == 0x20) && (pPacket->dataType[1] == 0x00)) {
 
 										/* add this packet to cloud2deviceList. */
-										nolock_list_push(GetLan2deviceList(), pPacket);										
+										if(nolock_list_push(GetLan2deviceList(), pPacket)!=0x01)
+										{
+												EJ_PacketCloudFree(pPacket);
+										}
 
 										EJ_InfoPrintf(("[ej_user_lanserver.c][LANReceiveThread][INFO]: receive an lan2device packet.\r\n"));
 									}
@@ -568,7 +571,10 @@ void LANServerReceiveThread(void *arg)
 										}
 
 										/* add this packet to cloud2wifiList. */
-										nolock_list_push(GetLan2wifiList(), pPacket);
+										if(nolock_list_push(GetLan2wifiList(), pPacket)!=0x01)
+										{
+											EJ_PacketCloudFree(pPacket);
+										}
 										EJ_Printf("[ej_user_lanserver.c][LANReceiveThread] after: %d\r\n", __LINE__);
 									}
 					

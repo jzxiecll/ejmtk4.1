@@ -158,7 +158,7 @@ static int ej_device_fota(unsigned int image_len,unsigned int frame_size)
 	if (nolock_list_push(GetWifi2deviceList(), pRequestPacket) != 0x01)
 	{
 		EJ_Printf("[ej_device_fota]add packet to wifi2devicelist failed.\r\n");
-		EJ_mem_free(pRequestPacket);
+		EJ_PacketUartFree(pRequestPacket);
 		pRequestPacket = NULL;
 		return -EJ_FAIL;
 	}

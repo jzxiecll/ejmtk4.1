@@ -186,7 +186,7 @@ uint8_t Process_WifiModuleNetworkStateRequestCB(wifi2CloudPacket *pPacket)
 
 		if (nolock_list_push(GetWifi2cloudList(), pResponsePacket) != 0x01)
 		{
-
+				EJ_PacketCloudFree(pResponsePacket);
 		}
 	}
 
@@ -628,6 +628,7 @@ uint8_t Process_ReportWifiModuleInfoToCloudRequest(wifi2CloudPacket *pPacket)
 
 		if (nolock_list_push(GetWifi2cloudList(), pResponsePacket) != 0x01)
 		{
+			EJ_PacketCloudFree(pResponsePacket);
 			EJ_ErrPrintf(("[Process_ReportWifiModuleInfoToCloudRequest][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 		}
 	}else {
@@ -891,7 +892,8 @@ uint8_t Process_WifiModuleRebootRequest(wifi2CloudPacket *pPacket)
 		if (pResponsePacket->data) {
 			memcpy(pResponsePacket->data, (uint8_t *)&response, sizeof(PacketWifiModuleRebootResponse));
 			if (nolock_list_push(GetWifi2cloudList(), pResponsePacket) != 0x01)
-			{
+			{	
+				EJ_PacketCloudFree(pResponsePacket);
 				EJ_ErrPrintf(("[Process_WifiModuleRebootRequest][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 			}
 		}
@@ -944,6 +946,7 @@ uint8_t Process_WifiModuleResetToFactoryRequest(wifi2CloudPacket *pPacket)
 			memcpy(pResponsePacket->data, (uint8_t *)&response, sizeof(PacketWifiModuleResetToFactoryResponse));
 			if (nolock_list_push(GetWifi2cloudList(), pResponsePacket) != 0x01)
 			{
+				EJ_PacketCloudFree(pResponsePacket);
 				EJ_ErrPrintf(("[Process_WifiModuleRebootRequest][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 			}
 		}
@@ -1034,6 +1037,7 @@ void Process_WifiModuleConfigRequest(wifi2CloudPacket *pPacket)
 				/* add this packet to wifi2lan list.*/
 				if (nolock_list_push(GetWifi2lanList(), pResponsePacket) != 0x01)
 				{
+					EJ_PacketCloudFree(pResponsePacket);
 					EJ_ErrPrintf(("[Process_WifiModuleConfigRequest][ERROR]: add packet to wifi2udplist failed.\r\n"));
 				}else
 				{
@@ -1591,6 +1595,7 @@ void Process_DeviceFirmwareVersionUpdateRequest(wifi2CloudPacket *pPacket)
 					/* add this packet to wifi2cloud list.*/
 					if (nolock_list_push(GetWifi2deviceList(), pRequestPacket) != 0x01)
 					{
+						EJ_PacketUartFree(pRequestPacket);
 						EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: add packet to wifi2devicelist failed.\r\n"));
 					}
 				}else{
@@ -1599,7 +1604,8 @@ void Process_DeviceFirmwareVersionUpdateRequest(wifi2CloudPacket *pPacket)
 					EJ_PrintWifi2CloudPacket(pReportDeviceUpgradeInfo,"0x62:wifi2CloudPacket:0x8063");
 					
 					if (nolock_list_push(GetWifi2cloudList(), pReportDeviceUpgradeInfo) != 0x01)
-					{
+					{	
+						EJ_PacketCloudFree(pReportDeviceUpgradeInfo);
 						EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_QueryDeviceFirmwareVersionRequest][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 					}	
 				}
@@ -1662,7 +1668,7 @@ void Process_heartBeatRequest(wifi2CloudPacket *pPacket)
 
 			if (nolock_list_push(GetWifi2lanList(), pResponsePacket) != 0x01)
 			{
-		
+				EJ_PacketCloudFree(pResponsePacket);
 				EJ_ErrPrintf(("[ej_cmd_mqtt.c][Process_heartBeatRequest][ERROR]: add packet to wifi2lanlist failed.\r\n"));
 			}
 		}

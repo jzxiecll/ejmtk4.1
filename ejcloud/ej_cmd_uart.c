@@ -595,14 +595,13 @@ uint8_t Process_CheckNetworkStatusRequestCB(uart2WifiPacket *pPacket)
     uart2WifiPacket *pResponsePacket = noticeNetworkStatus(pPacket->dataID);
 
     if (pResponsePacket) {
-
-      if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
-	{
-	  EJ_ErrPrintf(("[UARTCommands.c][Process_CheckNetworkStatusRequestCB][ERROR]: nolock_list_push failed.\r\n"));
-	}
-			
-    }else {
-
+	    if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
+		{
+			EJ_PacketUartFree(pResponsePacket);
+		    EJ_ErrPrintf(("[UARTCommands.c][Process_CheckNetworkStatusRequestCB][ERROR]: nolock_list_push failed.\r\n"));
+		}		
+    }else 
+    {
       EJ_ErrPrintf(("[UARTCommands.c][Process_CheckNetworkStatusRequestCB][ERROR]: noticeNetworkStatus failed.\r\n"));
     }
 				
@@ -669,6 +668,7 @@ uint8_t Process_DeviceSyncSystemTimeRequestCB(uart2WifiPacket *pPacket)
 
 	if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	  {
+	  	EJ_PacketUartFree(pResponsePacket);
 	    EJ_ErrPrintf(("[UARTCommands.c][Process_DeviceSyncSystemTimeRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	  }
       }
@@ -752,11 +752,12 @@ uint8_t Process_DeviceGetWifiModulePropertyRequestCB(uart2WifiPacket *pPacket)
 				
 	if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	  {
+	  	EJ_PacketUartFree(pResponsePacket);
 	    EJ_ErrPrintf(("[UARTCommands.c][Process_DeviceGetWifiModulePropertyRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	  }	
       }else {
 
-	EJ_ErrPrintf(("[UARTCommands.c][Process_DeviceGetWifiModulePropertyRequestCB][ERROR]: EJ_mem_malloc packet->data failed.\r\n"));
+		EJ_ErrPrintf(("[UARTCommands.c][Process_DeviceGetWifiModulePropertyRequestCB][ERROR]: EJ_mem_malloc packet->data failed.\r\n"));
       }
 		
     }else {
@@ -865,6 +866,7 @@ uint8_t Process_QueryDeviceVersionResponseCB(uart2WifiPacket *pPacket)
 			{
 				if (nolock_list_push(GetWifi2cloudList(), pReportWifiModuleInfo) != 0x01)
 				{
+					EJ_PacketCloudFree(pReportWifiModuleInfo);
 					EJ_ErrPrintf(("[ej_cmd_uart.c][Process_QueryDeviceVersionResponseCB][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 				uint8_t ota_flag = 0;
@@ -903,6 +905,7 @@ uint8_t Process_JudgeDeviceOTAResponseCB(uart2WifiPacket *pPacket)
 				
 				if (nolock_list_push(GetWifi2cloudList(), pReportDeviceUpgradeInfo) != 0x01)
 				{
+					EJ_PacketCloudFree(pReportDeviceUpgradeInfo);
 					EJ_ErrPrintf(("[ej_cmd_uart.c][QueryDeviceUpdate][ERROR]: add packet to wifi2cloudlist failed.\r\n"));
 				}
 				
@@ -1303,6 +1306,7 @@ uart2WifiPacket * settingUartBaud(uint8_t baud)
 
       if (nolock_list_push(GetWifi2deviceList(), pPacket) != 0x01)
 	  {
+	  	EJ_PacketUartFree(pPacket);
 	  	EJ_ErrPrintf(("[ej_cmd_uart.c][settingUartBaud][ERROR]: nolock_list_push failed.\r\n"));
 	  }
 			
@@ -1333,12 +1337,13 @@ uint8_t Process_SettingUartBaudRequestCB(uart2WifiPacket *pPacket)
 
 	if (nolock_list_push(GetWifi2deviceList(), pPacket) != 0x01)
 	  {
+	  	EJ_PacketUartFree(pPacket);
 	    EJ_ErrPrintf(("[ej_cmd_uart.c][Process_SettingUartBaudRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	  }
 				
       }else {
 
-	EJ_ErrPrintf(("[ej_cmd_uart.c][Process_SettingUartBaudRequestCB][ERROR]: settingUartBaud failed.\r\n"));
+		EJ_ErrPrintf(("[ej_cmd_uart.c][Process_SettingUartBaudRequestCB][ERROR]: settingUartBaud failed.\r\n"));
       }
     }
   }
@@ -1389,7 +1394,8 @@ uint8_t Process_WifiPowerRequest(uart2WifiPacket *pPacket)
 
 	  if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	    {
-	      EJ_ErrPrintf(("[ej_cmd_uart.c][Process_WifiPowerRequest][ERROR]: nolock_list_push failed.\r\n"));
+	    	EJ_PacketUartFree(pResponsePacket);
+	        EJ_ErrPrintf(("[ej_cmd_uart.c][Process_WifiPowerRequest][ERROR]: nolock_list_push failed.\r\n"));
 	    }
 
 	}
@@ -1442,6 +1448,7 @@ uint8_t Process_RenameWifiSSIDRequestCB(uart2WifiPacket *pPacket)
 
 	  if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	    {
+	      EJ_PacketUartFree(pResponsePacket);
 	      EJ_ErrPrintf(("[ej_cmd_uart.c][Process_RenameWifiSSIDRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	    }
 
@@ -1525,6 +1532,7 @@ uint8_t Process_DeviceEasyLinkRequestCB(uart2WifiPacket *pPacket)
 
 		  if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 			 {
+			 	EJ_PacketUartFree(pResponsePacket);
 			    EJ_ErrPrintf(("[ej_cmd_uart.c][Process_DeviceEasyLinkRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 			 }
 				
@@ -1584,6 +1592,7 @@ uint8_t Process_DeviceRebootRequestCB(uart2WifiPacket *pPacket)
 
 	if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	  {
+	    EJ_PacketUartFree(pResponsePacket);
 	    EJ_ErrPrintf(("[ej_cmd_uart.c][Process_DeviceRebootRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	  }
       }
@@ -1625,6 +1634,7 @@ uint8_t Process_DeviceResetToFactoryRequestCB(uart2WifiPacket *pPacket)
 
 	if (nolock_list_push(GetWifi2deviceList(), pResponsePacket) != NOLOCK_OPERATION_SUCCESS)
 	  {
+	  	EJ_PacketUartFree(pResponsePacket);
 	    EJ_ErrPrintf(("[ej_cmd_uart.c][Process_DeviceResetToFactoryRequestCB][ERROR]: nolock_list_push failed.\r\n"));
 	  }
       }

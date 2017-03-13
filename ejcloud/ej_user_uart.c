@@ -401,13 +401,19 @@ void EJ_UartReceiveThread(void *arg)
 
 							EJ_PrintUart2WifiPacket(pUart2WifiPacket, "[Uart2WifiRecv]");
 							if (pUart2WifiPacket->crypt & ACK_BITS) {
-								nolock_list_push(GetDevice2wifiAckList(), pUart2WifiPacket);
+								if(nolock_list_push(GetDevice2wifiAckList(), pUart2WifiPacket)!=0x01)
+								{
+									EJ_PacketUartFree(pUart2WifiPacket);
+								}								
 							}else { 
 								if (pUart2WifiPacket->crypt & QOS_BITS){
 									/* */
 									uart2WifiPacket * pResponsePacket = MakeUart2WifiResponsePacket(pUart2WifiPacket);
 									if (pResponsePacket) {
-										nolock_list_push(GetWifi2deviceAckList(), pResponsePacket);							
+										if(nolock_list_push(GetWifi2deviceAckList(), pResponsePacket)!=0x01)
+										{
+											EJ_PacketUartFree(pResponsePacket);
+										}
 									}else {
 										EJ_ErrPrintf(("[ERROR]: reponse for device2wifi failed.\r\n"));
 									}
@@ -448,7 +454,10 @@ void EJ_UartReceiveThread(void *arg)
 									}		
 
 									/*add this packet to device2wifi*/
-									nolock_list_push(GetDevice2wifiList(), pUart2WifiPacket);
+									if(nolock_list_push(GetDevice2wifiList(), pUart2WifiPacket)!=0x01)
+										{
+											EJ_PacketUartFree(pUart2WifiPacket);
+										}
 								
 									//EJ_InfoPrintf(("[INFO]: add an packet to device2wifiList!\r\n"));
 								

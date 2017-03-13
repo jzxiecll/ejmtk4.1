@@ -9,8 +9,12 @@
 *SERVER    DEFINE   CODE
 **************************************************************
 */
+//#if  EJ_TEST_SERVER
+//#define MASTER_SERVER_ADDR	"120.24.170.30"
+//#else
+#define MASTER_SERVER_ADDR	"120.77.76.24"
+//#endif
 
-#define MASTER_SERVER_ADDR	"120.24.170.30"
 
 #define SERVER_ADDR_MASTER	"120.24.170.30"
 #define SERVER_ADDR_TEST	"120.77.76.24"

@@ -1,5 +1,5 @@
 #include "ej_utils.h"
-
+#include <time.h>
 void xor(uint8_t *buf, uint8_t size)
 {
 	uint8_t i = 0;
@@ -273,4 +273,31 @@ void ej_itoa(char **buf, unsigned int  i, unsigned int base)
     }
 }
 
+
+
+int getweekofyear()
+{
+
+	
+	char s_month[5];
+    int  month, day, year;
+    struct tm timeinfo;
+	char buffer[5];
+	
+	memset(&timeinfo,0,sizeof(struct tm));
+		
+    const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
+
+    sscanf(__DATE__, "%s %d %d", s_month, &day, &year);
+
+    month = (strstr(month_names, s_month)-month_names)/3+1;
+	
+	timeinfo.tm_mday = day;
+	timeinfo.tm_mon = month;
+	timeinfo.tm_year = year;
+
+	strftime (buffer,5,"%W",&timeinfo);
+	return atoi(buffer);
+
+}
 
