@@ -14,7 +14,7 @@ void atTaskTimerCB()
 	uint8_t deviceID[6] = {0};
 	GetWifiStatusDeviceID(deviceID);	
 	int total = deviceID[0] | deviceID[1] | deviceID[2] | deviceID[3] | deviceID[4] | deviceID[5];
-	EJ_Printf("atTaskTimerCB total1=%d\r\n",total);
+	EJ_InfoPrintf(("atTaskTimerCB total1=%d\r\n",total));
 	if (total == 0) {
 		EJ_Printf("atTaskTimerCB total2=%d\r\n",total);
 		if (EJ_timer_change(&atTaskTimer, EJ_msec_to_ticks(5000), 0) != EJ_SUCCESS) {

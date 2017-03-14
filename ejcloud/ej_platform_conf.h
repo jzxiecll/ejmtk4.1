@@ -1,6 +1,8 @@
 #ifndef __EJ_PLATFORM_CONF_H__
 #define __EJ_PLATFORM_CONF_H__
 
+#include "ej_utils.h"
+
 #define EJ_TEST_SERVER 1
 
 /*
@@ -42,9 +44,9 @@
 
 #define SOFTWARE_VERSION_LSB	18
 
-#define PUBLISH_YEAR	17
+#define PUBLISH_YEAR	getyearofyear()
 
-#define PUBLISH_WEEK	01
+#define PUBLISH_WEEK	getweekofyear()
 
 
 

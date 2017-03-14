@@ -154,7 +154,7 @@ void SetWifiModuleInfoVersion(WIFIModuleVersion *version)
 {
   memcpy((uint8_t *)(&(h_InfoManagement.wifiInfo.version)), (uint8_t *)version, sizeof(WIFIModuleVersion));
 
-  storeWifiModuleInfoVersion(version);
+  //storeWifiModuleInfoVersion(version);
 }
 uint8_t storeWifiModuleInfoVersion(WIFIModuleVersion *version)
 {
@@ -163,7 +163,7 @@ uint8_t storeWifiModuleInfoVersion(WIFIModuleVersion *version)
   char strval[7] = { '\0' };
 
   sprintf(strval, "%d", version->versionRule);
-  ret = EJ_write_psm_item("wifimodule-version-versionRule", strval);
+  ret = EJ_write_psm_item("wm-ver-versionRule", strval);
   if (ret) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][storeWifiModuleInfoVersion][ERROR]: Error set wifimodule-version-versionRule.\r\n"));
   }
@@ -171,7 +171,7 @@ uint8_t storeWifiModuleInfoVersion(WIFIModuleVersion *version)
 
 
   sprintf(strval, "%d", version->functionCode);
-  ret = EJ_write_psm_item( "wifimodule-version-functionCode", strval);
+  ret = EJ_write_psm_item( "wm-ver-functionCode", strval);
   if (ret) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][storeWifiModuleInfoVersion][ERROR]: Error set wifimodule-version-functionCode.\r\n"));
   }
@@ -179,7 +179,7 @@ uint8_t storeWifiModuleInfoVersion(WIFIModuleVersion *version)
 
 
   sprintf(strval, "%d", version->hardwareVersion);
-  ret = EJ_write_psm_item("wifimodule-version-hardwareVersion", strval);
+  ret = EJ_write_psm_item("wm-ver-hardwareVersion", strval);
   if (ret) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][storeWifiModuleInfoVersion][ERROR]: Error set wifimodule-version-hardwareVersion.\r\n"));
   }
@@ -187,7 +187,7 @@ uint8_t storeWifiModuleInfoVersion(WIFIModuleVersion *version)
 
 
   sprintf(strval, "%d", version->softwareVersionMsb);
-  ret = EJ_write_psm_item( "wifimodule-version-softwareVersionMsb", strval);
+  ret = EJ_write_psm_item( "wm-ver-softwareVersionMsb", strval);
   if (ret) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][storeWifiModuleInfoVersion][ERROR]: Error set wifimodule-version-softwareVersionMsb.\r\n"));
   }
@@ -195,7 +195,7 @@ uint8_t storeWifiModuleInfoVersion(WIFIModuleVersion *version)
 
 
   sprintf(strval, "%d", version->softwareVersionLsb);
-  ret = EJ_write_psm_item("wifimodule-version-softwareVersionLsb", strval);
+  ret = EJ_write_psm_item("wm-ver-softwareVersionLsb", strval);
   if (ret) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][storeWifiModuleInfoVersion][ERROR]: Error set wifimodule-version-softwareVersionLsb.\r\n"));
   }
@@ -203,7 +203,7 @@ uint8_t storeWifiModuleInfoVersion(WIFIModuleVersion *version)
 
 
   sprintf(strval, "%d", version->publishYear);
-  ret = EJ_write_psm_item( "wifimodule-version-publishYear", strval);
+  ret = EJ_write_psm_item( "wm-ver-publishYear", strval);
   if (ret) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][storeWifiModuleInfoVersion][ERROR]: Error set wifimodule-version-publishYear.\r\n"));
   }
@@ -211,7 +211,7 @@ uint8_t storeWifiModuleInfoVersion(WIFIModuleVersion *version)
 
 
   sprintf(strval, "%d", version->publishWeek);
-  ret = EJ_write_psm_item( "wifimodule-version-publishWeek", strval);
+  ret = EJ_write_psm_item( "wm-ver-publishWeek", strval);
   if (ret) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][storeWifiModuleInfoVersion][ERROR]: Error set wifimodule-version-publishWeek.\r\n"));
   }
@@ -225,75 +225,74 @@ uint8_t loadWifiModuleInfoVersion()
 
   WIFIModuleVersion version;
 
+  memset(&version,0,sizeof(WIFIModuleVersion));
   char strval[7];
 
-  ret = EJ_read_psm_item("wifimodule-version-versionRule", strval,7);
+  ret = EJ_read_psm_item("wm-ver-versionRule", strval,7);
   if (ret != 0) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][loadWifiModuleInfoVersion][DEBUG]: Error get wifimodule-version-versionRule.\r\n"));
-		ret = 1;
+	ret = 1;
   }
   else {		
     version.versionRule= atoi(strval);
   }
 
-  ret = EJ_read_psm_item( "wifimodule-version-functionCode", strval,7);
+  ret = EJ_read_psm_item( "wm-ver-functionCode", strval,7);
   if (ret != 0) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][loadWifiModuleInfoVersion][DEBUG]: Error get wifimodule-version-functionCode.\r\n"));
-		ret = 1;
+	ret = 1;
   }
   else {
     version.functionCode= atoi(strval);
   }
 
-  ret = EJ_read_psm_item("wifimodule-version-hardwareVersion", strval,7);
+  ret = EJ_read_psm_item("wm-ver-hardwareVersion", strval,7);
   if (ret != 0) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][loadWifiModuleInfoVersion][DEBUG]: Error get wifimodule-version-hardwareVersion.\r\n"));
-
-		ret = 1;
+	ret = 1;
   }
   else {
     version.hardwareVersion= atoi(strval);
   }
 
-  ret = EJ_read_psm_item( "wifimodule-version-softwareVersionMsb", strval,7);
+  ret = EJ_read_psm_item( "wm-ver-softwareVersionMsb", strval,7);
   if (ret != 0) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][loadWifiModuleInfoVersion][DEBUG]: Error get wifimodule-version-softwareVersionMsb.\r\n"));
-		ret = 1;
+	ret = 1;
   }
   else {
     version.softwareVersionMsb= atoi(strval);
   }
 
-  ret = EJ_read_psm_item("wifimodule-version-softwareVersionLsb", strval,7);
+  ret = EJ_read_psm_item("wm-ver-softwareVersionLsb", strval,7);
   if (ret != 0) {
     EJ_ErrPrintf(("[WifiModuleStatus.c][loadWifiModuleInfoVersion][DEBUG]: Error get wifimodule-version-softwareVersionLsb.\r\n"));
-		ret = 1;
+	ret = 1;
   }
   else {
     version.softwareVersionLsb= atoi(strval);
   }
 
-  ret = EJ_read_psm_item( "wifimodule-version-publishYear", strval,7);
+  ret = EJ_read_psm_item( "wm-ver-publishYear", strval,7);
   if (ret != 0) {
-
     EJ_ErrPrintf(("[WifiModuleStatus.c][loadWifiModuleInfoVersion][DEBUG]: Error get wifimodule-version-publishYear.\r\n"));
-		ret = 1;
+	ret = 1;
   }
   else {
     version.publishYear= atoi(strval);
   }
 
-  ret = EJ_read_psm_item( "wifimodule-version-publishWeek", strval,7);
+  ret = EJ_read_psm_item( "wm-ver-publishWeek", strval,7);
   if (ret != 0) {
-    EJ_DebugPrintf(("[WifiModuleStatus.c][loadWifiModuleInfoVersion][DEBUG]: Error get wifimodule-version-publishWeek.\r\n"));
-		ret = 1;
+    EJ_ErrPrintf(("[WifiModuleStatus.c][loadWifiModuleInfoVersion][DEBUG]: Error get wifimodule-version-publishWeek.\r\n"));
+	ret = 1;
   }
   else {
     version.publishWeek= atoi(strval);
-    SetWifiModuleInfoVersion(&version);
   }
 
-	
+  if(ret==0)
+ 	 SetWifiModuleInfoVersion(&version);
   return ret;
 	
 }
@@ -922,7 +921,7 @@ void loadWifiConfigBackupServer2Addr()
 
   char strval[44+1];
 
-  ret = EJ_read_psm_item( "masterServerAddr", strval, 45);
+  ret = EJ_read_psm_item( "backupServer2Addr", strval, 45);
   if (ret != 0) {
 
     EJ_DebugPrintf(("[WifiModuleStatus.c][loadWifiConfigMasterServerAddr][DEBUG]: Error get masterServerAddr.\r\n"));
@@ -1207,6 +1206,7 @@ uint8_t loadInfoFromFlash()
     version.publishWeek = PUBLISH_WEEK;
 
     SetWifiModuleInfoVersion(&version);
+	storeWifiModuleInfoVersion(&version);
   }
 	
   return 0x00;
@@ -1216,32 +1216,20 @@ bool DeviceInfo_save_uuid(char* value)
 {
 	
 	int ret;
-
-
-	if (EJ_write_psm_item( "uuid", value) != 0) {
-		
+	if (EJ_write_psm_item("UUID", value) != 0) {	
 		return false;
 	}
-
 	return true;
 }
 
 bool DeviceInfo_load_uuid(char* value)
 {
 	char psm_val[65];
-	
 	int ret;
-
-
-
-	if (EJ_read_psm_item("uuid", psm_val, sizeof(psm_val)) != 0) {
-		
+	if (EJ_read_psm_item("UUID", psm_val, sizeof(psm_val)) != 0) {		
 		return false;
 	}
-
-	memcpy(value, psm_val, strlen(psm_val));
-
-	
+	memcpy(value, psm_val, strlen(psm_val));	
 	return true;
 }
 
@@ -1252,17 +1240,14 @@ uint8_t storeDeviceInfoDeviceUuid()
 	DeviceUuid id = GetDeviceInfoDeviceUuid();
 
 	uint8_t newDeviceUuidStr[7] = {'\0'};
-
 	sprintf(newDeviceUuidStr, "%s",id.uuid);
 	
 	ret = EJ_write_psm_item( "UUID", newDeviceUuidStr);
   	if (ret) {
     	EJ_ErrPrintf(("[WifiModuleStatus.c][storeDeviceInfoDeviceSN][ERROR]: Error set deviceinfo Uuid.\r\n"));
-  	}else{
-	    
+  	}else{	    
 		EJ_Printf("storeDeviceInfoDeviceUuid ======>%s\r\n",newDeviceUuidStr);
   }
-
 	return 0;
 }
 
@@ -1287,8 +1272,7 @@ uint8_t storeDeviceInfoDeviceid(uint8_t *Deviceid)
 
 uint8_t storeDeviceInfoNetwork()
 {
-	int ret = 0;
-	
+	int ret = 0;	
 	return ret;
 }
 
@@ -1297,9 +1281,7 @@ uint8_t storeDeviceInfoManufacturers()
   int ret = 0;
 
   char strval[7] = { '\0' };
-
   GetDeviceInfoManufacturers((uint8_t *)(strval));
-
   ret = EJ_write_psm_item( "manufacturers", strval);
   if (ret) {
     /*error*/
@@ -1311,11 +1293,8 @@ uint8_t storeDeviceInfoManufacturers()
 uint8_t storeDeviceInfoDeviceType()
 {
   int ret = 0;
-
   char strval[2] = { '\0' };
-
   strval[0] = GetDeviceInfoDeviceType();
-
   ret = EJ_write_psm_item( "deviceType", strval);
   if (ret) {
     EJ_Printf("Error set deviceinfo deviceType.\r\n");
@@ -1329,8 +1308,7 @@ uint8_t storeDeviceInfoDeviceType()
 
 uint8_t storeInfoToFlash()
 {
-
-  return 0x00;
+	return 0x00;
 }
 
 static int EJ_PROVISION_AP_NUM;

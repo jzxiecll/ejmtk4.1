@@ -17,6 +17,7 @@ extern "C"
 #endif
 
 int EJ_wifi_fota_task(void *arg);
+void EJ_wifi_fota_trigger_update();
 int EJ_wifi_firmware_download(const char *url_str, uint32_t datasize);
 int EJ_device_firmware_download(const char *url_str, uint32_t datasize);
 #ifdef __cplusplus

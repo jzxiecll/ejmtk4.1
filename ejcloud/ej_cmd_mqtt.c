@@ -504,7 +504,16 @@ uint8_t Process_GetWifiModuleUpgradeResponseCB(wifi2CloudPacket *pPacket)
 					version.functionCode = upgradeVersion->functionCode;
 
 					SetWifiModuleInfoVersion(&version);
+					storeWifiModuleInfoVersion(&version);
 
+					reportWifiUpgradeInfoToCloud();					
+					///sleep 3s
+					EJ_thread_sleep(3000);
+					EJ_Printf("fota_result, ret = %d \r\n", ret);
+					// trigger
+					EJ_wifi_fota_trigger_update();
+				    
+					
 					#if 0
 					wifi2CloudPacket *pReportWifiModuleInfo = reportWifiUpgradeInfoToCloud();
 					EJ_PrintWifi2CloudPacket(pReportWifiModuleInfo,"wifi2CloudPacket:0x8058");

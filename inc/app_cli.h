@@ -25,6 +25,7 @@ void ej_cli_modify_clouddomain_addr(int argc, char *argv[]);
 void ej_cli_set_log_level(int argc, char *argv[]);
 void ej_cli_get_softwareversion(int argc, char *argv[]);
 void ej_cli_wifi_fota_http(int argc, char *argv[]);
+void ej_cli_ejcloud_item_read(int argc, char *argv[]);
 
 
 #define EJ_CLI_AIRKISS_ENTRY     { "airkiss",   "<Ejcloud airkiss Connection>", ej_smart_config_airkiss },
@@ -36,6 +37,7 @@ void ej_cli_wifi_fota_http(int argc, char *argv[]);
 #define EJ_CLI_MDA		{"md", "<Ejcloud modify cloud domain addr>", ej_cli_modify_clouddomain_addr},
 #define EJ_CLI_MLL		{"mll", "<Ejcloud modify log level: 4--cloud,5--uart and cloud>", ej_cli_set_log_level},
 #define EJ_CLI_SOFTVER  {"version", "<Ejcloud Get Software Version>", ej_cli_get_softwareversion},
+#define EJ_CLI_EJ_ITEM  {"ejcloud", "<Ejcloud Wifi fota http url>", ej_cli_ejcloud_item_read},
 
 #define EJ_CLI_FOTA_HTTP  {"updatefw", "<Ejcloud Wifi fota http url>", ej_cli_wifi_fota_http},
 
@@ -49,6 +51,7 @@ void ej_cli_wifi_fota_http(int argc, char *argv[]);
 						EJ_CLI_MLL\
 						EJ_CLI_FOTA_HTTP\
 						EJ_CLI_SOFTVER \
+						EJ_CLI_EJ_ITEM \
 
 
 #ifdef __cplusplus

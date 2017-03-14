@@ -277,27 +277,21 @@ void ej_itoa(char **buf, unsigned int  i, unsigned int base)
 
 int getweekofyear()
 {
-
-	
 	char s_month[5];
-    int  month, day, year;
-    struct tm timeinfo;
-	char buffer[5];
-	
-	memset(&timeinfo,0,sizeof(struct tm));
-		
+    int  month, day, year;	
     const char month_names[] = "JanFebMarAprMayJunJulAugSepOctNovDec";
-
     sscanf(__DATE__, "%s %d %d", s_month, &day, &year);
-
-    month = (strstr(month_names, s_month)-month_names)/3+1;
-	
-	timeinfo.tm_mday = day;
-	timeinfo.tm_mon = month;
-	timeinfo.tm_year = year;
-
-	strftime (buffer,5,"%W",&timeinfo);
-	return atoi(buffer);
-
+    month = (strstr(month_names, s_month)-month_names)/3;
+	return  (month*30+day)/7+1;
 }
+
+
+int getyearofyear()
+{
+	char s_month[5];
+    int  day, year;
+    sscanf(__DATE__, "%s %d %d", s_month, &day, &year);
+	return year%100;
+}
+
 

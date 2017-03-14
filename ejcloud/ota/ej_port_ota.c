@@ -4,6 +4,18 @@
 
 static unsigned int ej_device_firmware_len;
 
+void EJ_wifi_fota_trigger_update()
+{
+		fota_trigger_update();		
+		// TODO: reboot device
+		hal_wdt_config_t wdt_config;
+		wdt_config.mode = HAL_WDT_MODE_RESET;
+		wdt_config.seconds = 30;
+		hal_wdt_init(&wdt_config);	
+		hal_wdt_software_reset();
+}
+
+
 int ej_wifi_fota_http(char *url)
 {
 	int ret = 1 ;
@@ -15,25 +27,20 @@ int ej_wifi_fota_http(char *url)
 	ret = fota_download_by_http(url);
 	EJ_Printf ("fota_download_by_http, ret = %d \r\n", ret);
 
-	if(!ret)
-	{
-		reportWifiUpgradeInfoToCloud();
-	}
-	///sleep 3s
-	EJ_thread_sleep(3000);
-	if(!ret)
-	{
-		// download success
-		fota_trigger_update();		
-		// TODO: reboot device
-		hal_wdt_config_t wdt_config;
-		wdt_config.mode = HAL_WDT_MODE_RESET;
-		wdt_config.seconds = 30;
-		hal_wdt_init(&wdt_config);	
-		hal_wdt_software_reset();
-	}
+//	if(!ret)
+//	{
+//		reportWifiUpgradeInfoToCloud();
+//	}
+//	///sleep 3s
+//	EJ_thread_sleep(3000);
+//	if(!ret)
+//	{
+//		// download success
+//		//ej_wifi_fota_trigger_update();
 
-    EJ_Printf("fota_result, ret = %d \r\n", ret);
+//	}
+
+//    EJ_Printf("fota_result, ret = %d \r\n", ret);
     return ret;
 }
 
@@ -166,21 +173,22 @@ static int ej_device_fota(unsigned int image_len,unsigned int frame_size)
 	//2.2  wait for frame ack then send 
 	uart2WifiPacket *pReceiveAckPacket = NULL;	
 
-	while((((frame_no + 1)* DEVICE_BLOCK_SIZE)<(ej_device_firmware_len - 4))&&!deviceOtaFail)
+	while((((frame_no-1)* DEVICE_BLOCK_SIZE)<(ej_device_firmware_len - 4))&&!deviceOtaFail)
 	{
 		nolock_list_pop(GetDevice2FirmwareOtaAckList(),(void **)&pReceiveAckPacket);
 		if(pReceiveAckPacket)
 		{
-			EJ_PrintUart2WifiPacket(pReceiveAckPacket,"[OtaAck Packet]");
-			EJ_timer_reset(&deviceota_timer);						
+			//EJ_PrintUart2WifiPacket(pReceiveAckPacket,"[OtaAck Packet]");
+			EJ_timer_reset(&deviceota_timer);
+			
 			if(pReceiveAckPacket->data[0] == 0x00)
 			{
-				//frame_no = pReceiveAckPacket->data[1]+1;
+				//frame_no = pReceiveAckPacket->data[1]+1;			
 				frame_no++;
 			}
 			EJ_PacketUartFree(pReceiveAckPacket);
 			pReceiveAckPacket = NULL;			
-			offset = frame_no * DEVICE_BLOCK_SIZE;
+			offset = (frame_no-1) * DEVICE_BLOCK_SIZE;
 			if (!ej_read_frame_from_flash(offset,buffer,frame_size)) 
 			{					
 	   			uart2WifiPacket * pRequestPacket = getDeviceUpdateFramePacket(frame_num, frame_no, buffer);
@@ -202,7 +210,7 @@ void EJ_device_fota_task(unsigned int  frame_size)
 {
 	int ret =  ej_device_fota(ej_device_firmware_len,frame_size);
 	EJ_Printf("[EJ_device_fota_task]ej_device_fota imagelen = %d ,framesize = %d ,ret = %d\r\n",ej_device_firmware_len,frame_size,ret);
-	//EJ_App_reboot(1);
+	EJ_App_reboot(1);
 }
 
 

@@ -1,5 +1,5 @@
 #include "app_cli.h"
-
+#include "ej_utils.h"
 unsigned char ej_smart_config_ezconnect(unsigned char len, unsigned char *param[])
 {
     unsigned char status = 0;
@@ -156,6 +156,7 @@ void ej_cli_get_softwareversion(int argc, char *argv[])
 	sprintf(moduleverinfo,"%d%d%d%d%d",Version.hardwareVersion,Version.softwareVersionMsb,Version.softwareVersionLsb,Version.publishYear,Version.publishWeek);
 
 	EJ_Printf("[SoftWare_Version]: %s%s_%s_%s\r\n",mVersion,moduleverinfo,"00",data);	
+	getweekofyear();
 }
 
 
@@ -164,10 +165,34 @@ void ej_cli_get_softwareversion(int argc, char *argv[])
 
 	//EJ_Printf("xxxxxxxx fota argc=%d,argv[0]=%s\r\n",argc,argv[0]);
 	if (argc == 1) {
-		EJ_wifi_fota_task(argv[0]);
+		if(!EJ_wifi_fota_task(argv[0]))
+		{
+			EJ_wifi_fota_trigger_update();
+		}
+		else
+		{
+			EJ_ErrPrintf(("[ERROR]: wifi fota http failed!\r\n"));
+		}
 	}else {
 		EJ_ErrPrintf(("[ERROR]: wifi fota http error argc!\r\n"));
 	}
 }
 
+
+
+void  ej_cli_ejcloud_item_read(int argc, char *argv[])
+{
+	if(argc >= 1)
+	{
+		ej_cli_read_item(argv[0]);
+		
+	}else{
+		EJ_Printf("usage:ejcloud <item>\r\n");
+		EJ_Printf("The most commonly used ejcloud commands are:\r\n\r\n");
+		EJ_Printf("	<item> read the item store in flash\r\n");
+		
+	}
+
+
+}
 

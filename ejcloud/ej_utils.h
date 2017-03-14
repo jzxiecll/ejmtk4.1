@@ -9,6 +9,9 @@
 void xor(uint8_t *buf, uint8_t size);
 int strsplinum(char *str, const char*del) ;
 void split( char **arr, char *str, const char *del);
+int getweekofyear();
+int getyearofyear();
+
 
 
 #endif
